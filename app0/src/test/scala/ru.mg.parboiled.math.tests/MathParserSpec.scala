@@ -47,11 +47,5 @@ class MathParserSpec extends SpecificationWithJUnit {
       check(result)
     }
 
-    "correctly handle whitespaces inside expression" in {
-      val input = "1 % 2 - ( 12 + 3 ) / 2"
-      val result:ParsingResult[Nothing] = ReportingParseRunner(parser.InputLine).run(input)
-      check(result)
-    }
-
   }
 }
