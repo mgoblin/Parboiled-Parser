@@ -44,7 +44,6 @@ class CompareParserSpec extends SpecificationWithJUnit {
       val input = "10 < 3 < 1"
       val result = ReportingParseRunner(parser.InputLine).run(input)
       check(result)
-      println(ParseTreeUtils.printNodeTree(result))
     }
 
   }
