@@ -5,12 +5,17 @@ import org.parboiled.scala._
 
 /**
  * Base class for expressions parser.
- * <p>Responsible for whitespace support and parsing expressions like<br/>
+ * <p>
+ *   Responsible for whitespace support and parsing expressions like<br/>
  * Primitive ~ Operation ~ Primitive with priority and parens<br/>
  * where <br/>
  * Primitive is a rule for number or string or boolean<br/>
  * and Operations is a list of operands. List string contains operators with same priority.
  * First items has higher priority.
+ * </p>
+ * <p>
+ *   Descend classes need to override Primitive and Operations members.
+ * </p>
  */
 abstract class ExpressionParser extends Parser {
 
@@ -33,6 +38,5 @@ abstract class ExpressionParser extends Parser {
   def LParen = "("
   def RParen = ")"
 
-  def expr(e:Rule0, op: String) =  { e ~ zeroOrMore(anyOf(op) ~ e) }
-
+  def expr(e: Rule0, opGroup: String) = {e ~ zeroOrMore(anyOf(opGroup) ~ e)}
 }

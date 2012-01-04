@@ -5,5 +5,5 @@ import ru.mg.parboiled.ExpressionParser
 
 class MathParser extends ExpressionParser {
   def Primitive = rule { oneOrMore("0" - "9") }
-  def Operations = List("^%", "*/", "+-")
+  def Operations = List("*/", "+-")
 }

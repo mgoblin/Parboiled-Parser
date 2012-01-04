@@ -24,7 +24,7 @@ class MathParserSpec extends SpecificationWithJUnit {
   "Math parser" should {
 
     "parse math expressions with addition and substraction" in {
-      val input = "1+2"
+      val input = "1-2"
       val result = ReportingParseRunner(parser.InputLine).run(input)
       check(result)
     }
@@ -48,8 +48,8 @@ class MathParserSpec extends SpecificationWithJUnit {
     }
 
     "correctly handle whitespaces inside expression" in {
-      val input = "1 % 2 - ( 12 + 3 ) / 2"
-      val result:ParsingResult[Nothing] = ReportingParseRunner(parser.InputLine).run(input)
+      val input = "1 * 2 - ( 12 + 3 ) / 2"
+      val result = ReportingParseRunner(parser.InputLine).run(input)
       check(result)
     }
 

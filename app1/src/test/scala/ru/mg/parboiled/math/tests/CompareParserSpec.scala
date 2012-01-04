@@ -3,7 +3,6 @@ package ru.mg.parboiled.math.tests
 import org.specs._
 import ru.mg.parboiled.math.CompareParser
 import org.parboiled.scala._
-import org.parboiled.support.ParseTreeUtils
 
 
 class CompareParserSpec extends SpecificationWithJUnit {

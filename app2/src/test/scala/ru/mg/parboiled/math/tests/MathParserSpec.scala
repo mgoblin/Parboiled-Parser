@@ -4,53 +4,69 @@ import org.specs._
 import ru.mg.parboiled.math.MathParser
 import org.parboiled.scala.parserunners.ReportingParseRunner
 import org.parboiled.scala.ParsingResult
+import org.parboiled.errors.ErrorUtils
 
 class MathParserSpec extends SpecificationWithJUnit {
   val parser = new MathParser {
     override val buildParseTree = true
   }
 
-  def check(result: ParsingResult[Nothing]) {
-    val treeRoot = result.parseTreeRoot
+  def checkTree(parsingResult: ParsingResult[Int]) {
+    val treeRoot = parsingResult.parseTreeRoot
 
-    result must not be null
-    result.parseErrors must be empty;
+    parsingResult must not be null
+    parsingResult.parseErrors must be empty;
     treeRoot.getChildren.size must_== 2
     treeRoot.getLabel mustEq "InputLine"
     treeRoot.getChildren.get(0).getLabel mustEq "Expression"
     treeRoot.getChildren.get(1).getLabel mustEq "EOI"
+
   }
+
+  def checkEquals(parsingResult: ParsingResult[Int], expected: Int) {
+    parsingResult.result match {
+      case Some(value) => value must_== expected
+      case None => fail(ErrorUtils.printParseErrors(parsingResult))
+    }
+  }
+
+
 
   "Math parser" should {
 
     "parse math expressions with addition and substraction" in {
       val input = "1+2"
       val result = ReportingParseRunner(parser.InputLine).run(input)
-      check(result)
+      checkEquals(result, 3)
+      checkTree(result)
     }
 
     "parse math expressions with multiplication and division" in {
-      val input = "1*2"
+      val input = "2/1"
       val result = ReportingParseRunner(parser.InputLine).run(input)
-      check(result)
+      checkEquals(result, 2)
+      checkTree(result)
     }
 
     "parse mixed math expressions with + - * /" in {
-      val input = "1*2+3/2"
+      val input = "1*2+6/2"
       val result = ReportingParseRunner(parser.InputLine).run(input)
-      check(result)
+      checkEquals(result, 5)
+      checkTree(result)
     }
 
     "parse mixed math expressions with + - * / and parens" in {
-      val input = "(2+(1+20)*5/10+9)"
+      val input = "2+(1+19)*2/10+1"
       val result = ReportingParseRunner(parser.InputLine).run(input)
-      check(result)
+      checkTree(result)
+      checkEquals(result, 7)
     }
 
     "correctly handle whitespaces inside expression" in {
-      val input = "1 % 2 - ( 12 + 3 ) / 2"
-      val result:ParsingResult[Nothing] = ReportingParseRunner(parser.InputLine).run(input)
-      check(result)
+      val input = "10 * 2 - ( 12 + 4 ) / 2"
+      val result = ReportingParseRunner(parser.InputLine).run(input)
+      checkTree(result)
+      checkEquals(result, 12)
     }
 
   }

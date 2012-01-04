@@ -3,7 +3,19 @@ package ru.mg.parboiled.math
 import org.parboiled.scala._
 import ru.mg.parboiled.ExpressionParser
 
-class MathParser extends ExpressionParser {
+class MathParser extends ExpressionParser[Int] {
   def Primitive = rule { oneOrMore("0" - "9") }
-  def Operations = List("^%", "*/", "+-")
+  def Operations = List("*/", "-+")
+
+  def value(v: String) = {
+    println("Value " + v)
+    v.toInt
+  }
+
+  def calc(operation: String, op1: Int, op2: Int) = operation match {
+    case "+" => op1 + op2
+    case "-" => op1 - op2
+    case "*" => op1 * op2
+    case "/" => op1 / op2
+  }
 }
