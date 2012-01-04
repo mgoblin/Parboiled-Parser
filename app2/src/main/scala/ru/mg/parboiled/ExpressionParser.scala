@@ -2,7 +2,15 @@ package ru.mg.parboiled
 
 import org.parboiled.scala._
 
-
+/**
+ * Base class for expressions parser.
+ * <p>Responsible for whitespace support and parsing expressions like<br/>
+ * Primitive ~ Operation ~ Primitive with priority and parens<br/>
+ * where <br/>
+ * Primitive is a rule for number or string or boolean<br/>
+ * and Operations is a list of operands. List string contains operators with same priority.
+ * First items has higher priority.
+ */
 abstract class ExpressionParser extends Parser {
 
   def Primitive:Rule0
