@@ -4,7 +4,7 @@ import org.parboiled.scala._
 
 
 /**
- * Base class for expressions parser.
+ * Trait for expressions parser.
  * <p>
  *   Responsible for whitespace support and parsing expressions like<br/>
  * Primitive ~ Operation ~ Primitive with priority and parens<br/>
@@ -14,29 +14,41 @@ import org.parboiled.scala._
  * First items has higher priority.
  * </p>
  * <p>
- *   Descend classes need to override Primitive and Operations members.
+ *   Descend classes should override Primitive and Operations members.
  * </p>
  */
-abstract class ExpressionParser extends Parser {
+trait ExpressionParser extends Parser {
 
-  def Primitive:Rule0
-  def Operations:List[String]
+  /**
+   * Primitive is a element of parsing. For example operand in math expression.
+   * Descendants should define primitive
+   * @return primitive rule
+   */
+  def Primitive: Rule0
+
+  /**
+   * List of available operations on primitives. Descendants should define operations.
+   * Item with zero index has highest priority and etc.
+   * Each item can contain operations group. One operation is group corresponds to one char.
+   * @return operations list
+   */
+  def Operations: List[String]
+
+  def LParen = "("
+  def RParen = ")"
 
 
   def InputLine = rule { Expression ~ EOI }
 
   def Expression: Rule0 = rule { Operations.foldLeft(Factor)(expr) }
 
-  def Factor = rule { Number | Parens }
+  protected def Factor = rule { Number | Parens }
 
-  def Parens = rule { WhiteSpace ~ LParen ~ Expression ~ RParen ~ WhiteSpace}
+  protected def Parens = rule { WhiteSpace ~ LParen ~ Expression ~ RParen ~ WhiteSpace}
 
-  def Number = rule { WhiteSpace ~ Primitive ~ WhiteSpace}
+  protected def Number = rule { WhiteSpace ~ Primitive ~ WhiteSpace}
 
-  def WhiteSpace: Rule0 = rule { zeroOrMore(anyOf(" \n\r\t\f")) }
+  protected def WhiteSpace: Rule0 = rule { zeroOrMore(anyOf(" \n\r\t\f")) }
 
-  def LParen = "("
-  def RParen = ")"
-
-  def expr(e: Rule0, opGroup: String) = {e ~ zeroOrMore(anyOf(opGroup) ~ e)}
+  protected def expr(e: Rule0, opGroup: String) = {e ~ zeroOrMore(anyOf(opGroup) ~ e)}
 }
