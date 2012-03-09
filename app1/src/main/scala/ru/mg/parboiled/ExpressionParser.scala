@@ -40,15 +40,16 @@ trait ExpressionParser extends Parser {
 
   def InputLine = rule { Expression ~ EOI }
 
-  def Expression: Rule0 = rule { Operations.foldLeft(Factor)(expr) }
+  def Expression: Rule0 = rule { Operations.foldLeft(Item)(OperationExpression) }
 
-  protected def Factor = rule { Number | Parens }
+  protected def OperationExpression(e: Rule0, opGroup: String) = { e ~ zeroOrMore(anyOf(opGroup) ~ e) }
 
-  protected def Parens = rule { WhiteSpace ~ LParen ~ Expression ~ RParen ~ WhiteSpace}
+  protected def Item = rule { PrimitiveExpression | ParensExpression }
 
-  protected def Number = rule { WhiteSpace ~ Primitive ~ WhiteSpace}
+  protected def ParensExpression = rule { WhiteSpace ~ LParen ~ Expression ~ RParen ~ WhiteSpace}
+
+  protected def PrimitiveExpression = rule { WhiteSpace ~ Primitive ~ WhiteSpace}
 
   protected def WhiteSpace: Rule0 = rule { zeroOrMore(anyOf(" \n\r\t\f")) }
 
-  protected def expr(e: Rule0, opGroup: String) = {e ~ zeroOrMore(anyOf(opGroup) ~ e)}
 }
