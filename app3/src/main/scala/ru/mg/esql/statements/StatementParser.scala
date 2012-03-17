@@ -9,7 +9,7 @@ import ru.mg.esql.ast.LineStatementNode
  * Line statement is string with ESQL statement. Delimited by ;
  * Parser does not analyze statement or comment body
  */
-trait StatementParser extends Parser {
+trait StatementParser extends ReservedWordsParser {
 
   /**
    * <p>Line statement rule.</p>
@@ -47,24 +47,5 @@ trait StatementParser extends Parser {
     oneOrMore(noneOf(StatementDelimiter)) ~? ModuleUtils.isNotModuleOrFunction ~> { _.toString } }
 
   def StatementDelimiter = ";"
-
-  def Identifier = rule {
-    oneOrMore("a" - "z" | "A" - "Z" | "0" - "9" | "_" )
-  }
-
-  // Whitespace rule
-  protected def WS: Rule0 = rule {
-    zeroOrMore(anyOf(" \t\n\r\f"))
-  }
-
-  /**
-   * We redefine the default string-to-rule conversion to also match trailing whitespace if the string ends with
-   * a blank, this keeps the rules free from most whitespace matching clutter
-   */
-  override implicit def toRule(string: String) =
-    if (string.endsWith(" "))
-      str(string.trim) ~ WS
-    else
-      str(string)
 
 }

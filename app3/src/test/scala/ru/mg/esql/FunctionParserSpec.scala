@@ -94,13 +94,23 @@ class FunctionParserSpec extends SpecificationWithJUnit {
   }
 
   "Function parser" should {
-    "parse procedure internal declaration without body" in {
+    "parse internal procedure internal declaration without body" in {
 
       val input = "CREATE PROCEDURE Main();"
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
       val decl = result.resultValue
       decl.text must_== "Main()"
+
+    }
+
+    "parse internal function internal declaration without body" in {
+
+      val input = "CREATE FUNCTION Main() RETURNS INT;"
+      val result = ReportingParseRunner(parser.FunctionStatement).run(input)
+
+      val decl = result.resultValue
+      decl.text must_== "Main() RETURNS INT"
 
     }
 

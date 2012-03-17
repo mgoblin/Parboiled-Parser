@@ -22,11 +22,20 @@ trait FunctionParser extends StatementParser {
   }
 
   def FunctionSignature: Rule1[String] = rule {
-    WS ~ FunctionName ~ ParamsDecl ~~> { (a, b) => a + b } ~ WS
+    WS ~ FunctionName ~ ParamsDecl ~ optional(FunctionReturn) ~~> {  _ + _ + conv(_) } ~ WS
+  }
+  
+  def conv(x: Option[String]): String = x match {
+    case Some(v) => " " + v
+    case None => ""
   }
   
   def ParamsDecl: Rule1[String] = rule {
-    WS ~ "(" ~ zeroOrMore(!")" ~ ANY) ~> { "(" + _.toString + ")" } ~ ")" ~ WS
+    WS ~ "(" ~ zeroOrMore(noneOf(")")) ~> { "(" + _ + ")" } ~ ")" ~ WS
+  }
+  
+  def FunctionReturn = rule {
+    WS ~ ignoreCase("RETURNS") ~ WS ~ TypeDecl ~> { "RETURNS " + _ } ~ WS
   }
   
   def FunctionBody = rule {
