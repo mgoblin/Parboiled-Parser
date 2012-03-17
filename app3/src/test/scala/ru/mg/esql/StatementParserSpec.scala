@@ -18,7 +18,7 @@ class StatementParserSpec extends SpecificationWithJUnit {
 
     val commentNode = result.resultValue
     commentNode.text must_== text
-    commentNode.line must_== 1
+    commentNode.startLine must_== 1
   }
 
   "Statement parser" should {
@@ -54,7 +54,7 @@ class StatementParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.LineStatement).run(input).resultValue
 
       result.text must_== "declare \n  CacheQueueTable \nSHARED ROW"
-      result.line must_== 3
+      result.startLine must_== 3
     }
 
     "Parse executable statement with line comment" in  {
