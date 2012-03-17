@@ -33,13 +33,63 @@ class FunctionParserSpec extends SpecificationWithJUnit {
   }
 
   "Function parser signature rule " should {
-    "Parse procedure/function signature" in  {
+    "parse procedure/function signature" in  {
 
       val input = "Main()"
       val result = ReportingParseRunner(parser.FunctionSignature).run(input)
 
       val signature = result.resultValue
-      signature must_== "Main"
+      signature must_== input
+    }
+  }
+
+  "Function parser parameter declaration rule" should {
+    "parse parameter declaration with modifier" in {
+
+      val input = "(IN InputExcList REFERENCE)"
+      val result = ReportingParseRunner(parser.ParamsDecl).run(input)
+      
+      val paramDecl = result.resultValue
+      paramDecl must_== input
+
+    }
+
+    "parse parameter declaration without modifier" in {
+
+      val input = "(InputExcList REFERENCE)"
+      val result = ReportingParseRunner(parser.ParamsDecl).run(input)
+
+      val paramDecl = result.resultValue
+      paramDecl must_== input
+
+    }
+
+    "parse parameter declaration with CONSTANT" in {
+
+      val input = "(InputExcList CONSTANT REFERENCE)"
+      val result = ReportingParseRunner(parser.ParamsDecl).run(input)
+
+      val paramDecl = result.resultValue
+      paramDecl must_== input
+
+    }
+  }
+
+  "Function parser parameters rule" should {
+    "parse one parameter" in  {
+      val input = "(InputExcList CONSTANT REFERENCE)"
+      val result = ReportingParseRunner(parser.ParamsDecl).run(input)
+
+      val paramDecl = result.resultValue
+      paramDecl must_== input
+    }
+
+    "parse parameter list" in  {
+      val input = "(InputExcList REFERENCE, i INT, j INT)"
+      val result = ReportingParseRunner(parser.ParamsDecl).run(input)
+
+      val paramDecl = result.resultValue
+      paramDecl must_== input
     }
   }
 
@@ -50,7 +100,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
       val decl = result.resultValue
-      decl.text must_== "Main"
+      decl.text must_== "Main()"
 
     }
 
@@ -62,7 +112,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
       val decl = result.resultValue
-      decl.text must_== "Main"
+      decl.text must_== "Main()"
       decl.statements.size must_== 1
       decl.statements(0).isInstanceOf[LineStatementNode] must_== true
     }

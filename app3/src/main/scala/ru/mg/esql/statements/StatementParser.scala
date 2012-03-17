@@ -49,7 +49,7 @@ trait StatementParser extends Parser {
   def StatementDelimiter = ";"
 
   def Identifier = rule {
-    oneOrMore("a" - "z" | "A" - "Z" | "0" - "9" | "_")
+    oneOrMore("a" - "z" | "A" - "Z" | "0" - "9" | "_" )
   }
 
   // Whitespace rule

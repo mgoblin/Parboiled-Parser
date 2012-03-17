@@ -22,12 +22,16 @@ trait FunctionParser extends StatementParser {
   }
 
   def FunctionSignature: Rule1[String] = rule {
-    WS ~ FunctionName ~> { _.toString } ~ WS ~ "(" ~ ")" ~ WS
+    WS ~ FunctionName ~ ParamsDecl ~~> { (a, b) => a + b } ~ WS
+  }
+  
+  def ParamsDecl: Rule1[String] = rule {
+    WS ~ "(" ~ zeroOrMore(!")" ~ ANY) ~> { "(" + _.toString + ")" } ~ ")" ~ WS
   }
   
   def FunctionBody = rule {
     WS ~ zeroOrMore((LineStatement | Comment) ~ WS) ~ WS
   }
 
-  def FunctionName = Identifier
+  def FunctionName: Rule1[String] = rule { Identifier ~> { _.toString } }
 }
