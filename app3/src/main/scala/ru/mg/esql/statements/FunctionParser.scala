@@ -1,8 +1,8 @@
 package ru.mg.esql.statements
 
 import org.parboiled.scala.rules.Rule1
-import ru.mg.esql.AstNode._
-import ru.mg.esql.FunctionNode
+import ru.mg.esql.ast.AstNode._
+import ru.mg.esql.ast.FunctionNode
 import org.parboiled.scala._
 
 

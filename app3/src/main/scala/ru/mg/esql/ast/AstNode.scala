@@ -1,11 +1,11 @@
-package ru.mg.esql
+package ru.mg.esql.ast
 
 import org.parboiled.Context
 
 object AstNode {
 
   def moduleNode = {
-    (header:String, statements:List[AstNode], footer: String, context: Context[_]) =>
+    (header: String, statements: List[AstNode], footer: String, context: Context[_]) =>
       val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
       new ModuleNode(header.trim(), lineNo, statements)
   }
@@ -36,17 +36,16 @@ object AstNode {
 
 sealed abstract class AstNode(val text: String, val line: Long)
 
-abstract case class CompoundNode(
-  override val text: String,
-  override val line: Long,
-  statements: List[AstNode])
+abstract case class CompoundNode (
+ override val text: String,
+ override val line: Long,
+ statements: List[AstNode])
 extends AstNode(text, line)
 
-abstract case class SimpleNode(
+abstract case class SimpleNode (
   override val text: String,
   override val line: Long)
 extends AstNode(text, line)
-
 
 case class ModuleNode(
   override val text: String,

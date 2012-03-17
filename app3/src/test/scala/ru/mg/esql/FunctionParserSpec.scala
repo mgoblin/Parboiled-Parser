@@ -1,5 +1,6 @@
 package ru.mg.esql
 
+import ast.LineStatementNode
 import org.specs.SpecificationWithJUnit
 import statements.FunctionParser
 import org.parboiled.scala.parserunners.ReportingParseRunner

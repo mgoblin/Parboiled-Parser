@@ -1,7 +1,6 @@
 package ru.mg.esql.statements
 
-import org.parboiled.scala._
-import ru.mg.esql.AstNode._
+import ru.mg.esql.ast.AstNode._
 import ru.mg.esql.statements.ModuleUtils._
 
 

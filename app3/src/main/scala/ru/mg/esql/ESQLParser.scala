@@ -1,5 +1,6 @@
 package ru.mg.esql
 
+import ast.AstNode
 import org.parboiled.scala._
 import statements.ModuleParser
 
