@@ -12,7 +12,7 @@ class ESQLParser extends ModuleParser {
   def File = rule { zeroOrMore(Statement ~ WS) }
   
   def Statement: Rule1[AstNode] = rule {
-    LineStatement | LineComment
+    LineStatement | Comment
   }
 
 }

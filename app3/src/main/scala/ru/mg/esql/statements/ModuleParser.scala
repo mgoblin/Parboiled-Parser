@@ -23,7 +23,7 @@ trait ModuleParser extends FunctionParser {
   }
 
   def ModuleBody = rule {
-    zeroOrMore((LineComment | LineStatement) ~ WS)
+    zeroOrMore((Comment | LineStatement) ~ WS)
   }
 
   def ModuleName = Identifier

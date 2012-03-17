@@ -13,7 +13,7 @@ trait FunctionParser extends StatementParser {
   }
 
   def FunctionStatement: Rule1[FunctionNode] = rule {
-    FunctionHeader ~ FunctionSignature ~ optional(LineComment) ~ FunctionBody ~ StatementDelimiter ~~> withContext(functionNode)
+    FunctionHeader ~ FunctionSignature ~ optional(Comment) ~ FunctionBody ~ StatementDelimiter ~~> withContext(functionNode)
   }
   
   def FunctionHeader: Rule1[String] = rule {
@@ -26,7 +26,7 @@ trait FunctionParser extends StatementParser {
   }
   
   def FunctionBody = rule {
-    WS ~ zeroOrMore((LineStatement | LineComment) ~ WS) ~ WS
+    WS ~ zeroOrMore((LineStatement | Comment) ~ WS) ~ WS
   }
 
   def FunctionName = Identifier

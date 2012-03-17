@@ -1,7 +1,7 @@
 package ru.mg.esql.statements
 
 import org.parboiled.scala._
-import ru.mg.esql.ast.AstNode.{commentNode, lineStatementNode}
+import ru.mg.esql.ast.AstNode._
 import ru.mg.esql.ast.LineStatementNode
 
 /**
@@ -18,9 +18,11 @@ trait StatementParser extends Parser {
    * @return AST LineStatementNode
    */
   def LineStatement: Rule1[LineStatementNode] = rule {
-    WS ~ oneOrMore(Word) ~ WS ~ StatementDelimiter ~ optional(LineComment) ~~> withContext(lineStatementNode)
+    WS ~ oneOrMore(Word) ~ WS ~ StatementDelimiter ~ optional(Comment) ~~> withContext(lineStatementNode)
   }
 
+  def Comment = rule { LineComment | BlockComment }
+  
   /**
    * <p> Line comment rule. </p>
    * <p>
@@ -35,6 +37,10 @@ trait StatementParser extends Parser {
    */
   def LineComment = rule {
     WS ~ "--" ~ zeroOrMore(noneOf("\n")) ~> withContext(commentNode) ~ optional("\n")
+  }
+
+  def BlockComment = rule {
+    WS ~ "/**" ~ zeroOrMore(!"**/" ~ ANY) ~> withContext(blockCommentNode) ~ "**/" ~ WS
   }
 
   protected def Word = rule {

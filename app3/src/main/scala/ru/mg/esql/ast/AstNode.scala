@@ -29,7 +29,13 @@ object AstNode {
 
   def commentNode = {
     (text: String, context: Context[_]) =>
-      new CommentNode(text.trim(), context.getPosition.line)
+      new LineCommentNode(text.trim(), context.getPosition.line)
+  }
+
+  def blockCommentNode = {
+    (text: String, context: Context[_]) =>
+      val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
+      new BlockCommentNode(text.trim(), lineNo)
   }
 
 }
@@ -66,10 +72,20 @@ case class LineStatementNode(
   comment: Option[CommentNode])
 extends SimpleNode(text, startLine)
 
-case class CommentNode(
+abstract case class CommentNode(
   override val text: String,
   override val startLine: Long)
 extends SimpleNode(text, startLine)
+
+case class LineCommentNode(
+  override val text: String,
+  override val startLine: Long)
+extends CommentNode(text, startLine)
+
+case class BlockCommentNode (
+  override val text: String,
+  override val startLine: Long
+) extends CommentNode(text, startLine)
 
 case class ParamNode(
   override val text: String,
