@@ -73,9 +73,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
       paramDecl must_== input
 
     }
-  }
 
-  "Function parser parameters rule" should {
     "parse one parameter" in  {
       val input = "(InputExcList CONSTANT REFERENCE)"
       val result = ReportingParseRunner(parser.ParamsDecl).run(input)
@@ -93,8 +91,19 @@ class FunctionParserSpec extends SpecificationWithJUnit {
     }
   }
 
+  "Function parser language declaration rule " should {
+
+    "parse function language declaration" in {
+      val input = "LANGUAGE ESQL"
+      val result = ReportingParseRunner(parser.FunctionLanguage).run(input).resultValue
+
+      result must_== "LANGUAGE ESQL"
+    }
+
+  }
+
   "Function parser" should {
-    "parse internal procedure internal declaration without body" in {
+    "parse internal procedure declaration without body and returns" in {
 
       val input = "CREATE PROCEDURE Main();"
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
@@ -104,7 +113,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
 
     }
 
-    "parse internal function internal declaration without body" in {
+    "parse internal function declaration without body" in {
 
       val input = "CREATE FUNCTION Main() RETURNS INT;"
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
@@ -123,6 +132,18 @@ class FunctionParserSpec extends SpecificationWithJUnit {
 
       val decl = result.resultValue
       decl.text must_== "Main()"
+      decl.statements.size must_== 1
+      decl.statements(0).isInstanceOf[LineStatementNode] must_== true
+    }
+
+    "parse function declaration with specified language" in {
+      val input = """CREATE PROCEDURE Main() LANGUAGE ESQL
+        copyHeaders();
+        ;"""
+      val result = ReportingParseRunner(parser.FunctionStatement).run(input)
+
+      val decl = result.resultValue
+      decl.text must_== "Main() LANGUAGE ESQL"
       decl.statements.size must_== 1
       decl.statements(0).isInstanceOf[LineStatementNode] must_== true
     }

@@ -22,7 +22,9 @@ trait FunctionParser extends StatementParser {
   }
 
   def FunctionSignature: Rule1[String] = rule {
-    WS ~ FunctionName ~ ParamsDecl ~ optional(FunctionReturn) ~~> {  _ + _ + conv(_) } ~ WS
+    WS ~ FunctionName ~ ParamsDecl ~ optional(FunctionReturn) ~ optional(FunctionLanguage) ~~>
+      { (name: String, params: String, ret: Option[String], language: Option[String]) =>
+        name + params + conv(ret) + conv(language) } ~ WS
   }
   
   def conv(x: Option[String]): String = x match {
@@ -32,6 +34,11 @@ trait FunctionParser extends StatementParser {
   
   def ParamsDecl: Rule1[String] = rule {
     WS ~ "(" ~ zeroOrMore(noneOf(")")) ~> { "(" + _ + ")" } ~ ")" ~ WS
+  }
+  
+  def FunctionLanguage: Rule1[String] = rule {
+    WS ~ ignoreCase("LANGUAGE") ~ WS ~
+      (ignoreCase("ESQL") | ignoreCase("DATABASE") | ignoreCase("JAVA")) ~> { "LANGUAGE " + _ } ~ WS
   }
   
   def FunctionReturn = rule {
