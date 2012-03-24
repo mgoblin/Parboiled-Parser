@@ -17,14 +17,14 @@ import org.parboiled.scala._
  *   Descend classes should override Primitive and Operations members.
  * </p>
  */
-trait ExpressionParser[R] extends Parser {
+trait ExpressionParser[T] extends Parser {
 
   /**
    * Primitive is a element of parsing. For example operand in math expression.
    * Descendants should define primitive
    * @return primitive rule
    */
-  def Primitive: Rule0
+  def Primitive: Rule1[T]
 
   /**
    * List of available operations on primitives. Descendants should define operations.
@@ -34,8 +34,7 @@ trait ExpressionParser[R] extends Parser {
    */
   def Operations: List[String]
 
-  def value(s: String): R
-  def calc(operation:Char, op1:R, op2:R): R
+  def calc(operation:Char, op1:T, op2: T): T
 
   def LParen = "("
   def RParen = ")"
@@ -43,12 +42,12 @@ trait ExpressionParser[R] extends Parser {
 
   def InputLine = rule { Expression ~ EOI }
 
-  def Expression: Rule1[R] = rule { Operations.foldLeft(Item)(OperationExpression) }
+  def Expression: Rule1[T] = rule { Operations.foldLeft(Item)(OperationExpression) }
 
-  protected def OperationExpression(e: Rule1[R], opGroup: String) = {
+  protected def OperationExpression(e: Rule1[T], opGroup: String) = {
     e ~ ( zeroOrMore(
       opGroup.toCharArray.map(op =>
-        String.valueOf(op) ~ e ~~> ((op1:R, op2) => calc(op, op1, op2))
+        String.valueOf(op) ~ e ~~> ((op1: T, op2: T) => calc(op, op1, op2))
       ).reduceLeft (_|_)))
   }
 
@@ -56,7 +55,7 @@ trait ExpressionParser[R] extends Parser {
 
   protected def ParensExpression = rule { WhiteSpace ~ LParen ~ Expression ~ RParen ~ WhiteSpace}
 
-  protected def PrimitiveExpression: Rule1[R] = rule { WhiteSpace ~ Primitive ~> value ~ WhiteSpace}
+  protected def PrimitiveExpression: Rule1[T] = rule { WhiteSpace ~ Primitive ~ WhiteSpace}
 
   protected def WhiteSpace: Rule0 = rule { zeroOrMore(anyOf(" \n\r\t\f")) }
 

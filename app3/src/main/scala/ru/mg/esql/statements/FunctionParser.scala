@@ -6,7 +6,7 @@ import ru.mg.esql.ast.FunctionNode
 import org.parboiled.scala._
 
 
-trait FunctionParser extends StatementParser {
+trait FunctionParser extends CompoundStatementParser {
   
   def FunctionStatementMask = rule {
     FunctionHeader ~ oneOrMore(ANY) ~ StatementDelimiter

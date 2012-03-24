@@ -44,7 +44,7 @@ trait StatementParser extends ReservedWordsParser {
   }
 
   protected def Word = rule {
-    oneOrMore(noneOf(StatementDelimiter)) ~? ModuleUtils.isNotModuleOrFunction ~> { _.toString } }
+    oneOrMore(noneOf(StatementDelimiter)) ~? ModuleUtils.isLineStatement ~> { _.toString } }
 
   def StatementDelimiter = ";"
 

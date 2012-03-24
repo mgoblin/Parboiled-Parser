@@ -16,12 +16,6 @@ object AstNode {
       new FunctionNode(signature.trim(), comment, lineNo, body)
   }
 
-  def paramNode = {
-    (header: String, context: Context[_]) =>
-      val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
-      new ParamNode(header.trim(), lineNo)
-  }
-
   def lineStatementNode = {
     (text: List[String], comment: Option[CommentNode], context: Context[_]) =>
       new LineStatementNode(text.mkString(" ").trim(), context.getPosition.line, comment)
@@ -36,6 +30,16 @@ object AstNode {
     (text: String, context: Context[_]) =>
       val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
       new BlockCommentNode(text.trim(), lineNo)
+  }
+
+  def compoundStatementNode = {
+    (firstComment: Option[LineCommentNode],
+     body: List[SimpleNode],
+     lastLineComment: Option[LineCommentNode],
+     context: Context[_]) =>
+        val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
+        new CompoundStatementNode("BEGIN END", lineNo, firstComment, lastLineComment)
+
   }
 
 }
@@ -87,7 +91,9 @@ case class BlockCommentNode (
   override val startLine: Long
 ) extends CommentNode(text, startLine)
 
-case class ParamNode(
+case class CompoundStatementNode (
   override val text: String,
-  override val startLine: Long)
-extends SimpleNode(text, startLine)
+  override val startLine: Long,
+  firstLineComment: Option[LineCommentNode],
+  lastLineComment: Option[LineCommentNode]
+) extends CommentNode(text, startLine)
