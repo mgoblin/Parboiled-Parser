@@ -18,7 +18,7 @@ trait StatementParser extends ReservedWordsParser {
    * @return AST LineStatementNode
    */
   def LineStatement: Rule1[LineStatementNode] = rule {
-    WS ~ oneOrMore(Word) ~ WS ~ StatementDelimiter ~ optional(Comment) ~~> withContext(lineStatementNode)
+    zeroOrMore(!StatementDelimiter ~ ANY) ~? ModuleUtils.isLineStatement ~> { _.toString } ~ StatementDelimiter ~ optional(Comment) ~~> withContext(lineStatementNode)
   }
 
   def Comment = rule { LineComment | BlockComment }
@@ -42,9 +42,6 @@ trait StatementParser extends ReservedWordsParser {
   def BlockComment = rule {
     WS ~ "/**" ~ zeroOrMore(!"**/" ~ ANY) ~> withContext(blockCommentNode) ~ "**/" ~ WS
   }
-
-  protected def Word = rule {
-    oneOrMore(noneOf(StatementDelimiter)) ~? ModuleUtils.isLineStatement ~> { _.toString } }
 
   def StatementDelimiter = ";"
 

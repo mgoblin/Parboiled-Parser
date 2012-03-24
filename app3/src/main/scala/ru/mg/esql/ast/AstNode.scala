@@ -17,8 +17,8 @@ object AstNode {
   }
 
   def lineStatementNode = {
-    (text: List[String], comment: Option[CommentNode], context: Context[_]) =>
-      new LineStatementNode(text.mkString(" ").trim(), context.getPosition.line, comment)
+    (text: String, comment: Option[CommentNode], context: Context[_]) =>
+      new LineStatementNode(text.trim(), context.getPosition.line, comment)
   }
 
   def commentNode = {

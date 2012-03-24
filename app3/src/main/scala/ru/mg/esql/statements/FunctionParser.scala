@@ -12,8 +12,6 @@ trait FunctionParser extends CompoundStatementParser {
 
   //TODO WS removing
 
-  // TODO Refactoring
-  
   def FunctionStatementMask = rule {
     FunctionHeader ~ oneOrMore(ANY) ~ StatementDelimiter
   }

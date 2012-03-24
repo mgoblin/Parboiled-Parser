@@ -13,7 +13,8 @@ class CompoundStatementSpec extends SpecificationWithJUnit {
     "parse begin end statement" in {
 
       val input = "BEGIN  END;"
-      val result = ReportingParseRunner(parser.BeginEnd).run(input).resultValue
+      val run = ReportingParseRunner(parser.BeginEnd).run(input)
+      val result = run.resultValue
 
       result mustNotBe null
       result.text must_== "BEGIN END"
@@ -29,7 +30,8 @@ class CompoundStatementSpec extends SpecificationWithJUnit {
         BEGIN -- start begin
         END;
       """
-      val result = ReportingParseRunner(parser.BeginEnd).run(input).resultValue
+      val run = ReportingParseRunner(parser.BeginEnd).run(input)
+      val result = run.resultValue
 
       result mustNotBe null
       result.text must_== "BEGIN END"
@@ -45,7 +47,8 @@ class CompoundStatementSpec extends SpecificationWithJUnit {
         BEGIN -- start begin
         END; -- end comment
       """
-      val result = ReportingParseRunner(parser.BeginEnd).run(input).resultValue
+      val run = ReportingParseRunner(parser.BeginEnd).run(input)
+      val result = run.resultValue
 
       result mustNotBe null
       result.text must_== "BEGIN END"
@@ -62,7 +65,8 @@ class CompoundStatementSpec extends SpecificationWithJUnit {
           call;
         END; -- end comment
       """
-      val result = ReportingParseRunner(parser.BeginEnd).run(input).resultValue
+      val run = ReportingParseRunner(parser.BeginEnd).run(input)
+      val result = run.resultValue
 
       result mustNotBe null
       result.text must_== "BEGIN END"
