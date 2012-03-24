@@ -40,7 +40,7 @@ trait StatementParser extends ReservedWordsParser {
   }
 
   def BlockComment = rule {
-    WS ~ "/**" ~ zeroOrMore(!"**/" ~ ANY) ~> withContext(blockCommentNode) ~ "**/" ~ WS
+    WS ~ "/**" ~ zeroOrMore(!"**/" ~ ANY) ~> withContext(blockCommentNode) ~ "**/"
   }
 
   def StatementDelimiter = ";"

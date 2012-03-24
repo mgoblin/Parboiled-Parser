@@ -8,10 +8,6 @@ import org.parboiled.scala._
 
 trait FunctionParser extends CompoundStatementParser {
 
-  //TODO external function syntax
-
-  //TODO WS removing
-
   def FunctionStatementMask = rule {
     FunctionHeader ~ oneOrMore(ANY) ~ StatementDelimiter
   }
@@ -35,28 +31,27 @@ trait FunctionParser extends CompoundStatementParser {
       case None => ""
     }
 
-    WS ~ FunctionName ~ ParamsDecl ~ optional(FunctionReturn) ~ optional(FunctionLanguage) ~~>
-      signature ~ WS
+    WS ~ FunctionName ~ WS ~ ParamsDecl ~ WS ~ optional(FunctionReturn) ~ WS ~ optional(FunctionLanguage) ~~>
+      signature
 
   }
 
   
   def ParamsDecl: Rule1[String] = rule {
-    WS ~ "(" ~ zeroOrMore(noneOf(")")) ~> { "(" + _ + ")" } ~ ")" ~ WS
+    "(" ~ zeroOrMore(noneOf(")")) ~> { "(" + _ + ")" } ~ ")"
   }
   
   def FunctionLanguage: Rule1[String] = rule {
-    WS ~ ignoreCase("LANGUAGE") ~ WS ~
-      (ignoreCase("ESQL") | ignoreCase("DATABASE") | ignoreCase("JAVA")) ~> { "LANGUAGE " + _ } ~ WS
+    LANGUAGE ~ WS ~ (ESQL | DATABASE | JAVA) ~> { "LANGUAGE " + _ }
   }
   
-  def FunctionReturn = rule {
-    WS ~ ignoreCase("RETURNS") ~ WS ~ TypeDecl ~> { "RETURNS " + _ } ~ WS
+  def FunctionReturn: Rule1[String] = rule {
+    RETURNS ~ WS ~ TypeDecl ~> { "RETURNS " + _ }
   }
   
   def FunctionBody = rule {
-    WS ~ zeroOrMore((BeginEnd | Comment) ~ WS) ~ WS
+    zeroOrMore(BeginEnd | Comment)
   }
 
-  def FunctionName: Rule1[String] = rule { WS ~ Identifier ~> { _.toString } }
+  def FunctionName = rule { Identifier ~> { _.toString } }
 }
