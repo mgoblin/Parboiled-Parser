@@ -7,16 +7,14 @@ import ru.mg.esql.ast.CompoundStatementNode
 
 trait CompoundStatementParser extends StatementParser {
 
-  def BeginEnd: Rule1[CompoundStatementNode] = rule {
+  def BeginEndStatement: Rule1[CompoundStatementNode] = rule {
     Begin ~
-      WS ~ zeroOrMore(Comment | BeginEnd | LineStatement)  ~
-    End ~
-    WS ~ StatementDelimiter ~
-    WS ~ optional(LineComment) ~~> withContext { compoundStatementNode }
+      zeroOrMore(Comment | BeginEndStatement | LineStatement)  ~
+    End ~ StatementDelimiter ~~> withContext { compoundStatementNode }
   }
 
   def Begin = rule {
-    WS ~ ignoreCase("BEGIN") ~ WS ~ optional(LineComment)
+    WS ~ ignoreCase("BEGIN")
   }
 
   def End = rule {
@@ -24,6 +22,6 @@ trait CompoundStatementParser extends StatementParser {
   }
 
   def BeginEndStatementMask = rule {
-    BeginEnd | Begin | End ~> { _.toString }
+    BeginEndStatement | Begin ~> { _.toString } | End ~> { _.toString }
   }
 }

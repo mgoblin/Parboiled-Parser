@@ -11,14 +11,14 @@ object AstNode {
   }
 
   def functionNode = {
-    (header: String, signature: String, comment: Option[CommentNode], body: List[AstNode], context: Context[_]) =>
+    (signature: String, body: List[AstNode], context: Context[_]) =>
       val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
-      new FunctionNode(signature.trim(), comment, lineNo, body)
+      new FunctionNode(signature.trim(), lineNo, body)
   }
 
   def lineStatementNode = {
-    (text: String, comment: Option[CommentNode], context: Context[_]) =>
-      new LineStatementNode(text.trim(), context.getPosition.line, comment)
+    (text: String, context: Context[_]) =>
+      new LineStatementNode(text.trim(), context.getPosition.line)
   }
 
   def commentNode = {
@@ -33,12 +33,10 @@ object AstNode {
   }
 
   def compoundStatementNode = {
-    (firstComment: Option[LineCommentNode],
-     body: List[AstNode],
-     lastLineComment: Option[LineCommentNode],
+     (body: List[AstNode],
      context: Context[_]) =>
         val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
-        new CompoundStatementNode("BEGIN END", lineNo, firstComment, lastLineComment, body)
+        new CompoundStatementNode("BEGIN END", lineNo, body)
 
   }
 
@@ -65,15 +63,13 @@ extends CompoundNode(text, startLine, statements)
 
 case class FunctionNode(
   override val text: String,
-  val comment: Option[CommentNode],
   override val startLine: Long,
   override val statements: List[AstNode])
 extends CompoundNode(text, startLine, statements)
 
 case class LineStatementNode(
   override val text: String,
-  override val startLine: Long,
-  comment: Option[CommentNode])
+  override val startLine: Long)
 extends SimpleNode(text, startLine)
 
 abstract case class CommentNode(
@@ -94,7 +90,5 @@ case class BlockCommentNode (
 case class CompoundStatementNode (
   override val text: String,
   override val startLine: Long,
-  firstLineComment: Option[LineCommentNode],
-  lastLineComment: Option[LineCommentNode],
   override val statements: List[AstNode]
 ) extends CompoundNode(text, startLine, statements)

@@ -7,7 +7,7 @@ import ru.mg.esql.statements.ModuleUtils._
 trait ModuleParser extends FunctionParser {
   
   def Module = rule {
-    (ModuleHeader ~ WS ~ ModuleBody ~ WS ~ ModuleFooter ~ WS ~ ignoreCase(StatementDelimiter)) ~~> withContext(moduleNode)
+    (ModuleHeader ~ WS ~ ModuleBody ~ WS ~ ModuleFooter ~ WS ~ StatementDelimiter) ~~> withContext(moduleNode)
   }
 
   def ModuleHeader = rule {

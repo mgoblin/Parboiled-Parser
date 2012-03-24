@@ -41,18 +41,21 @@ trait ReservedWordsParser extends Parser {
     zeroOrMore(anyOf(" \t\n\r\f"))
   }
 
-  def RETURNS = ignoreCase("RETURNS")
-  def LANGUAGE = ignoreCase("LANGUAGE")
-  def ESQL = ignoreCase("ESQL")
-  def DATABASE = ignoreCase("DATABASE")
-  def JAVA = ignoreCase("JAVA")
+  def RETURNS = ignoreCase("RETURNS") ~ WS
+  def LANGUAGE = ignoreCase("LANGUAGE") ~ WS
+  def ESQL = ignoreCase("ESQL") ~ WS
+  def DATABASE = ignoreCase("DATABASE") ~ WS
+  def JAVA = ignoreCase("JAVA") ~ WS
+  def CREATE = ignoreCase("CREATE") ~ WS
+  def PROCEDURE = ignoreCase("PROCEDURE") ~ WS
+  def FUNCTION = ignoreCase("FUNCTION") ~ WS
 
   /**
    * We redefine the default string-to-rule conversion to also match trailing whitespace if the string ends with
    * a blank, this keeps the rules free from most whitespace matching clutter
    */
   override implicit def toRule(string: String) =
-    if (string.endsWith(" ") || string.endsWith("\t") || string.endsWith("\n") || string.endsWith("\r") || string.endsWith("\f") )
+    if (string.endsWith(" "))
       str(string.trim) ~ WS
     else
       str(string)

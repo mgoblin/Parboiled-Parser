@@ -18,7 +18,7 @@ trait StatementParser extends ReservedWordsParser {
    * @return AST LineStatementNode
    */
   def LineStatement: Rule1[LineStatementNode] = rule {
-    zeroOrMore(!StatementDelimiter ~ ANY) ~? ModuleUtils.isLineStatement ~> { _.toString } ~ StatementDelimiter ~ optional(Comment) ~~> withContext(lineStatementNode)
+    zeroOrMore(!StatementDelimiter ~ ANY) ~? ModuleUtils.isLineStatement ~> { _.toString } ~ StatementDelimiter ~~> withContext(lineStatementNode)
   }
 
   def Comment = rule { LineComment | BlockComment }
@@ -36,13 +36,13 @@ trait StatementParser extends ReservedWordsParser {
    * @return CommentNode AST
    */
   def LineComment = rule {
-    WS ~ "--" ~ zeroOrMore(noneOf("\n")) ~> withContext(commentNode) ~ optional("\n")
+    zeroOrMore(anyOf(" \t")) ~ "--" ~ zeroOrMore(noneOf("\n")) ~> withContext(commentNode) ~ optional("\n")
   }
 
   def BlockComment = rule {
     WS ~ "/**" ~ zeroOrMore(!"**/" ~ ANY) ~> withContext(blockCommentNode) ~ "**/"
   }
 
-  def StatementDelimiter = ";"
+  def StatementDelimiter = rule { WS ~ ignoreCase(";") }
 
 }

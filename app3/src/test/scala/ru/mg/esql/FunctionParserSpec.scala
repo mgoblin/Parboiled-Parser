@@ -10,28 +10,6 @@ class FunctionParserSpec extends SpecificationWithJUnit {
 
   val parser = new FunctionParser { override val buildParseTree = true }
 
-  "Function parser header rule " should {
-    "Parse procedure header declaration" in  {
-
-      val input = "create procedure"
-      val result = ReportingParseRunner(parser.FunctionHeader).run(input)
-      
-      val decl = result.resultValue
-      decl must_== input
-
-    }
-
-    "Parse function header declaration" in  {
-
-      val input = "create function"
-      val result = ReportingParseRunner(parser.FunctionHeader).run(input)
-
-      val decl = result.resultValue
-      decl must_== input
-
-    }
-  }
-
   "Function parser signature rule " should {
     "parse procedure/function signature" in  {
 
@@ -97,7 +75,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
       val input = "LANGUAGE ESQL"
       val result = ReportingParseRunner(parser.FunctionLanguage).run(input).resultValue
 
-      result must_== "LANGUAGE ESQL"
+      result must_== " LANGUAGE ESQL"
     }
 
   }
@@ -105,7 +83,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
   "Function parser" should {
     "parse internal procedure declaration without body and returns" in {
 
-      val input = "CREATE PROCEDURE Main();"
+      val input = "CREATE PROCEDURE Main ();"
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
       val decl = result.resultValue
@@ -125,7 +103,8 @@ class FunctionParserSpec extends SpecificationWithJUnit {
 
     "parse procedure internal declaration with body and no params" in {
 
-      val input = """
+      val input =
+        """
         CREATE PROCEDURE Main() -- This is cool
         BEGIN
         END;
@@ -134,8 +113,8 @@ class FunctionParserSpec extends SpecificationWithJUnit {
 
       val decl = result.resultValue
       decl.text must_== "Main()"
-      decl.statements.size must_== 1
-      decl.statements(0).isInstanceOf[CompoundStatementNode] must_== true
+      decl.statements.size must_== 2
+      decl.statements(1).isInstanceOf[CompoundStatementNode] must_== true
     }
 
     "parse function declaration with specified language" in {

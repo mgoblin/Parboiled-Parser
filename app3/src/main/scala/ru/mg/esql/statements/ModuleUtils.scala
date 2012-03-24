@@ -20,7 +20,7 @@ object ModuleUtils {
 
   def isFunction = {
     x: String =>
-      !ReportingParseRunner(functionParser.FunctionStatementMask).run(x).hasErrors
+      !ReportingParseRunner(functionParser.FunctionStatement).run(x).hasErrors
   }
 
   def isBeginEnd = {

@@ -63,21 +63,20 @@ class StatementParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.LineStatement).run(input)
 
       check(result, "declare CacheQueueTable SHARED ROW")
-      result.resultValue.comment.get.text must_== "comment"
     }
 
     "Parse line statement with block comment" in  {
 
       val input = """
-        declare CacheQueueTable SHARED ROW; /**
+        declare CacheQueueTable SHARED ROW;
+        /**
           comment
         **/"""
       val result = ReportingParseRunner(parser.LineStatement).run(input)
 
       val node = result.resultValue
       node.text must_== "declare CacheQueueTable SHARED ROW"
-      node.startLine must_== 4
-      node.comment.get.text must_== "comment"
+      node.startLine must_== 2
     }
 
     "Dont be greedy with line comments on next line" in {
