@@ -7,6 +7,12 @@ import org.parboiled.scala._
 
 
 trait FunctionParser extends CompoundStatementParser {
+
+  //TODO external function syntax
+
+  //TODO WS removing
+
+  // TODO Refactoring
   
   def FunctionStatementMask = rule {
     FunctionHeader ~ oneOrMore(ANY) ~ StatementDelimiter
