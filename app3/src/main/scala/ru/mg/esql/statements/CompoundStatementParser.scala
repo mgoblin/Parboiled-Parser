@@ -10,8 +10,9 @@ trait CompoundStatementParser extends StatementParser {
   def BeginEnd: Rule1[CompoundStatementNode] = rule {
     Begin ~
       WS ~ zeroOrMore(Comment | BeginEnd | LineStatement)  ~
-    End ~~> withContext { compoundStatementNode } ~
-    WS ~ StatementDelimiter
+    End ~
+    WS ~ StatementDelimiter ~
+    WS ~ optional(LineComment) ~~> withContext { compoundStatementNode }
   }
 
   def Begin = rule {
@@ -19,6 +20,6 @@ trait CompoundStatementParser extends StatementParser {
   }
 
   def End = rule {
-    WS ~ ignoreCase("END") ~ WS ~ optional(LineComment)
+    WS ~ ignoreCase("END")
   }
 }

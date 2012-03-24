@@ -34,11 +34,11 @@ object AstNode {
 
   def compoundStatementNode = {
     (firstComment: Option[LineCommentNode],
-     body: List[SimpleNode],
+     body: List[AstNode],
      lastLineComment: Option[LineCommentNode],
      context: Context[_]) =>
         val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
-        new CompoundStatementNode("BEGIN END", lineNo, firstComment, lastLineComment)
+        new CompoundStatementNode("BEGIN END", lineNo, firstComment, lastLineComment, body)
 
   }
 
@@ -95,5 +95,6 @@ case class CompoundStatementNode (
   override val text: String,
   override val startLine: Long,
   firstLineComment: Option[LineCommentNode],
-  lastLineComment: Option[LineCommentNode]
-) extends CommentNode(text, startLine)
+  lastLineComment: Option[LineCommentNode],
+  override val statements: List[AstNode]
+) extends CompoundNode(text, startLine, statements)
