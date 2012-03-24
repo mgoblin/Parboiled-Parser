@@ -13,7 +13,7 @@ trait FunctionParser extends CompoundStatementParser {
   }
 
   def FunctionStatement: Rule1[FunctionNode] = rule {
-    FunctionHeader ~ FunctionSignature ~ optional(Comment) ~ FunctionBody ~ StatementDelimiter ~~> withContext(functionNode)
+    FunctionHeader ~ FunctionSignature ~ optional(Comment) ~ FunctionBody ~~> withContext(functionNode)
   }
   
   def FunctionHeader: Rule1[String] = rule {
@@ -22,15 +22,20 @@ trait FunctionParser extends CompoundStatementParser {
   }
 
   def FunctionSignature: Rule1[String] = rule {
+    def signature =  { (name: String, params: String, ret: Option[String], language: Option[String]) =>
+      name + params + conv(ret) + conv(language)
+    }
+
+    def conv(x: Option[String]): String = x match {
+      case Some(v) => " " + v
+      case None => ""
+    }
+
     WS ~ FunctionName ~ ParamsDecl ~ optional(FunctionReturn) ~ optional(FunctionLanguage) ~~>
-      { (name: String, params: String, ret: Option[String], language: Option[String]) =>
-        name + params + conv(ret) + conv(language) } ~ WS
+      signature ~ WS
+
   }
-  
-  def conv(x: Option[String]): String = x match {
-    case Some(v) => " " + v
-    case None => ""
-  }
+
   
   def ParamsDecl: Rule1[String] = rule {
     WS ~ "(" ~ zeroOrMore(noneOf(")")) ~> { "(" + _ + ")" } ~ ")" ~ WS
@@ -46,8 +51,8 @@ trait FunctionParser extends CompoundStatementParser {
   }
   
   def FunctionBody = rule {
-    WS ~ zeroOrMore((LineStatement | Comment) ~ WS) ~ WS
+    WS ~ zeroOrMore((BeginEnd | Comment) ~ WS) ~ WS
   }
 
-  def FunctionName: Rule1[String] = rule { Identifier ~> { _.toString } }
+  def FunctionName: Rule1[String] = rule { WS ~ Identifier ~> { _.toString } }
 }

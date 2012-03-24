@@ -25,9 +25,7 @@ object ModuleUtils {
 
   def isBeginEnd = {
     x: String => {
-      !(ReportingParseRunner(compoundStatementParser.BeginEnd).run(x).hasErrors &&
-      ReportingParseRunner(compoundStatementParser.Begin).run(x).hasErrors &&
-      ReportingParseRunner(compoundStatementParser.End).run(x).hasErrors)
+        !ReportingParseRunner(compoundStatementParser.BeginEndStatementMask).run(x).hasErrors
     }
   }
 

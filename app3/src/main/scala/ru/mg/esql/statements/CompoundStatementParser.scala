@@ -22,4 +22,8 @@ trait CompoundStatementParser extends StatementParser {
   def End = rule {
     WS ~ ignoreCase("END")
   }
+
+  def BeginEndStatementMask = rule {
+    BeginEnd | Begin | End ~> { _.toString }
+  }
 }

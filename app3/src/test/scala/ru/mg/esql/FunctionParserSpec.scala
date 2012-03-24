@@ -1,6 +1,6 @@
 package ru.mg.esql
 
-import ast.LineStatementNode
+import ast.CompoundStatementNode
 import org.specs.SpecificationWithJUnit
 import statements.FunctionParser
 import org.parboiled.scala.parserunners.ReportingParseRunner
@@ -125,27 +125,31 @@ class FunctionParserSpec extends SpecificationWithJUnit {
 
     "parse procedure internal declaration with body and no params" in {
 
-      val input = """CREATE PROCEDURE Main() -- This is cool
-        call;
-        ;"""
+      val input = """
+        CREATE PROCEDURE Main() -- This is cool
+        BEGIN
+        END;
+        """
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
       val decl = result.resultValue
       decl.text must_== "Main()"
       decl.statements.size must_== 1
-      decl.statements(0).isInstanceOf[LineStatementNode] must_== true
+      decl.statements(0).isInstanceOf[CompoundStatementNode] must_== true
     }
 
     "parse function declaration with specified language" in {
-      val input = """CREATE PROCEDURE Main() LANGUAGE ESQL
-        copyHeaders();
-        ;"""
+      val input = """
+      CREATE PROCEDURE Main() LANGUAGE ESQL
+      BEGIN
+      END;
+      """
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
       val decl = result.resultValue
       decl.text must_== "Main() LANGUAGE ESQL"
       decl.statements.size must_== 1
-      decl.statements(0).isInstanceOf[LineStatementNode] must_== true
+      decl.statements(0).isInstanceOf[CompoundStatementNode] must_== true
     }
   }
 
