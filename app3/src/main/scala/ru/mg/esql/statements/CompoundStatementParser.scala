@@ -9,8 +9,13 @@ trait CompoundStatementParser extends StatementParser {
 
   def BeginEndStatement: Rule1[CompoundStatementNode] = rule {
     Begin ~
-      zeroOrMore(Comment | BeginEndStatement | LineStatement)  ~
+      Body ~
+      //zeroOrMore(Comment | BeginEndStatement | LineStatement)  ~
     End ~ StatementDelimiter ~~> withContext { compoundStatementNode }
+  }
+
+  def Body = rule {
+    zeroOrMore(noneOf("END;")) ~~> { _ => new }
   }
 
   def Begin = rule {

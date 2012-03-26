@@ -1,0 +1,7 @@
+CREATE FUNCTION Main() RETURNS BOOLEAN
+BEGIN
+    -- CALL CopyMessageHeaders();
+    -- CALL CopyEntireMessage();
+    set CacheQueueTable.valid value = null;
+    RETURN TRUE;
+END;

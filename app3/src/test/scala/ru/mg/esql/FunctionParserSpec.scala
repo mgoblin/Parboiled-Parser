@@ -4,6 +4,7 @@ import ast.CompoundStatementNode
 import org.specs.SpecificationWithJUnit
 import statements.FunctionParser
 import org.parboiled.scala.parserunners.ReportingParseRunner
+import scala.io.Source
 
 
 class FunctionParserSpec extends SpecificationWithJUnit {
@@ -130,6 +131,32 @@ class FunctionParserSpec extends SpecificationWithJUnit {
       decl.statements.size must_== 1
       decl.statements(0).isInstanceOf[CompoundStatementNode] must_== true
     }
+  }
+
+  "parse function from file function1.esql" in {
+    val input = Source.fromURL(getClass.getResource("/function1.esql")).getLines().mkString("\n")
+    val result = ReportingParseRunner(parser.FunctionStatement).run(input)
+
+    result.hasErrors must_== false
+    result.resultValue.startLine must_== 1
+    result.resultValue.statements.length must_== 1
+
+    result.resultValue.statements(0).isInstanceOf[CompoundStatementNode] must_== true
+    val body = result.resultValue.statements(0).asInstanceOf[CompoundStatementNode]
+    body.statements.length must_== 4
+  }
+
+  "parse function from file function2.esql" in {
+    val input = Source.fromURL(getClass.getResource("/function2.esql")).getLines().mkString("\n")
+    val result = ReportingParseRunner(parser.FunctionStatement).run(input)
+
+    result.hasErrors must_== false
+    result.resultValue.startLine must_== 1
+    result.resultValue.statements.length must_== 1
+
+//    result.resultValue.statements(0).isInstanceOf[CompoundStatementNode] must_== true
+//    val body = result.resultValue.statements(0).asInstanceOf[CompoundStatementNode]
+//    body.statements.length must_== 3
   }
 
 }

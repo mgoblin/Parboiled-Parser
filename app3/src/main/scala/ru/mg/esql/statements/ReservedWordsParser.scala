@@ -6,7 +6,7 @@ import org.parboiled.scala._
 trait ReservedWordsParser extends Parser {
 
   def TypeDecl = rule {
-    T_BOOL | T_BOOLEAN | T_DATE | T_TIME | T_GMTTIME | T_TIMESTAMP | T_GMTTIMESTAMP | T_CHAR | T_CHARACTER |
+    T_BOOLEAN | T_BOOL | T_DATE | T_TIME | T_GMTTIME | T_TIMESTAMP | T_GMTTIMESTAMP | T_CHAR | T_CHARACTER |
     T_DEC | T_DECIMAL | T_FLOAT | T_INT | T_INTEGER  | T_ROW | T_BLOB | T_BIT | REFERENCE | T_REF | REFERENCE_TO
   }
 
