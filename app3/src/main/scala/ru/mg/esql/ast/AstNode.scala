@@ -39,6 +39,12 @@ object AstNode {
 
   }
 
+  def externalNode  = {
+    (body: String, context: Context[_]) =>
+      val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
+      List(new ExternalNode(body, lineNo))
+  }
+
 }
 
 sealed abstract class AstNode(val text: String, val startLine: Long)
@@ -76,6 +82,11 @@ case class BlockCommentNode (
 ) extends CommentNode(text, startLine)
 
 case class BeginEndNode (
+  override val text: String,
+  override val startLine: Long
+) extends AstNode(text, startLine)
+
+case class ExternalNode (
   override val text: String,
   override val startLine: Long
 ) extends AstNode(text, startLine)

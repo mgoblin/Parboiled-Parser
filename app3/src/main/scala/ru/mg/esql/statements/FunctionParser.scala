@@ -2,7 +2,7 @@ package ru.mg.esql.statements
 
 import org.parboiled.scala._
 import ru.mg.esql.ast.AstNode._
-import ru.mg.esql.ast.FunctionNode
+import ru.mg.esql.ast.{AstNode, FunctionNode}
 
 
 trait FunctionParser extends StatementParser {
@@ -32,8 +32,9 @@ trait FunctionParser extends StatementParser {
     RETURNS ~ TypeDecl ~> { " RETURNS " + _ } ~ WS
   }
   
-  def FunctionBody = rule {
-    oneOrMore((BeginEndStatement | Comment) ~ WS)
+  def FunctionBody: Rule1[List[AstNode]] = rule {
+    oneOrMore((BeginEndStatement | Comment) ~ WS) |
+    ignoreCase ("EXTERNAL") ~ ignoreCase ("NAME") ~ Identifier ~> withContext { externalNode }
   }
 
   def FunctionName = rule { Identifier ~> { _.toString } }
