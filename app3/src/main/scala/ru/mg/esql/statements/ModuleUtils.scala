@@ -6,7 +6,7 @@ object ModuleUtils {
 
   val moduleParser = new ModuleParser { override val buildParseTree = true }
   val functionParser = new FunctionParser { override val buildParseTree = true }
-  val compoundStatementParser = new CompoundStatementParser { override val buildParseTree = true }
+  val compoundStatementParser = new StatementParser { override val buildParseTree = true }
 
   def normalize = { x: String => x.split(" ").map(_.trim()).filter(!_.isEmpty).mkString(" ") }
   def normalizeList = { x: List[String] => x.map(_.trim()).filter(!_.isEmpty).mkString(" ") }
@@ -23,14 +23,14 @@ object ModuleUtils {
       !ReportingParseRunner(functionParser.FunctionStatement).run(x).hasErrors
   }
 
-  def isBeginEnd = {
-    x: String => {
-        !ReportingParseRunner(compoundStatementParser.BeginEndStatementMask).run(x).hasErrors
-    }
-  }
+//  def isBeginEnd = {
+//    x: String => {
+//        !ReportingParseRunner(compoundStatementParser.BeginEndStatementMask).run(x).hasErrors
+//    }
+//  }
 
   def isLineStatement = {
-    x: String => !(isModule(x) || isFunction(x) || isBeginEnd(x))
+    x: String => !(isModule(x) || isFunction(x) /*|| isBeginEnd(x)*/)
   }
 
 }

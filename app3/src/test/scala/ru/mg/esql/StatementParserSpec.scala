@@ -25,7 +25,7 @@ class StatementParserSpec extends SpecificationWithJUnit {
 
     "Parse line comment" in  {
 
-      val input = "-- This is a comment"
+      val input = "-- This is a comment\n"
       val result = ReportingParseRunner(parser.LineComment).run(input)
 
       check(result, "This is a comment")
@@ -85,12 +85,20 @@ class StatementParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.LineStatement).run(input).resultValue
 
       result.text must_== "declare CacheQueueTable SHARED ROW"
+    }
+
+    "Dont be greedy with statements" in {
+
+      val input = "declare CacheQueueTable SHARED ROW; \n call;"
+      val result = ReportingParseRunner(parser.LineStatement).run(input).resultValue
+
+      result.text must_== "declare CacheQueueTable SHARED ROW"
 
     }
 
     "Parse empty block comment" in {
 
-      val input = "/**\n**/"
+      val input = "/*\n*/"
       val result = ReportingParseRunner(parser.BlockComment).run(input)
 
       result.resultValue.text must_== ""
@@ -98,7 +106,7 @@ class StatementParserSpec extends SpecificationWithJUnit {
 
     "Parse block comment (one line)" in {
 
-      val input = "/** comment **/"
+      val input = "/* comment */"
       val result = ReportingParseRunner(parser.BlockComment).run(input)
 
       result.resultValue.text must_== "comment"
@@ -107,15 +115,16 @@ class StatementParserSpec extends SpecificationWithJUnit {
     "Parse block comment" in {
 
       val input =
-        """
-        /**
+        """/*
         *  comment
-        **/
+        */
         """
       val result = ReportingParseRunner(parser.BlockComment).run(input)
 
       result.resultValue.text must_== "*  comment"
     }
   }
+
+
 
 }

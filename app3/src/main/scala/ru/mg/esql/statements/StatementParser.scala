@@ -2,47 +2,32 @@ package ru.mg.esql.statements
 
 import org.parboiled.scala._
 import ru.mg.esql.ast.AstNode._
-import ru.mg.esql.ast.LineStatementNode
+import ru.mg.esql.ast.{BeginEndNode, LineStatementNode}
 
-/**
- * Line statement and comments parser.
- * Line statement is string with ESQL statement. Delimited by ;
- * Parser does not analyze statement or comment body
- */
+
 trait StatementParser extends ReservedWordsParser {
 
-  /**
-   * <p>Line statement rule.</p>
-   * <p>Support statements with "\n" inside - multi line statements</p>
-   *
-   * @return AST LineStatementNode
-   */
+  def BeginEndStatement: Rule1[BeginEndNode] = rule {
+    ignoreCase("BEGIN") ~
+      zeroOrMore(!(ignoreCase("END") ~ WS ~ StatementDelimiter) ~ ANY) ~> withContext{ beginEndNode } ~
+    ignoreCase("END") ~ WS ~ StatementDelimiter
+  }
+
   def LineStatement: Rule1[LineStatementNode] = rule {
-    zeroOrMore(!StatementDelimiter ~ ANY) ~? ModuleUtils.isLineStatement ~> { _.toString } ~ StatementDelimiter ~~> withContext(lineStatementNode)
+    zeroOrMore(!(StatementDelimiter) ~ ANY) ~> withContext(lineStatementNode) ~ StatementDelimiter
   }
 
   def Comment = rule { LineComment | BlockComment }
-  
-  /**
-   * <p> Line comment rule. </p>
-   * <p>
-   * Line comments starts with -- <br>
-   * For example:
-   * -- comment
-   * </p>
-   * Parse to LineComment AST node
-   * @see ru.mg.esql.ast.CommentNode
-   *
-   * @return CommentNode AST
-   */
+
   def LineComment = rule {
-    zeroOrMore(anyOf(" \t")) ~ "--" ~ zeroOrMore(noneOf("\n")) ~> withContext(commentNode) ~ optional("\n")
+    "--" ~ zeroOrMore(!(NewLine) ~ ANY) ~> withContext(commentNode) ~ NewLine
   }
 
   def BlockComment = rule {
-    WS ~ "/**" ~ zeroOrMore(!"**/" ~ ANY) ~> withContext(blockCommentNode) ~ "**/"
+    "/*" ~ zeroOrMore(!("*/") ~ ANY) ~> withContext(blockCommentNode) ~ "*/"
   }
 
-  def StatementDelimiter = rule { WS ~ ignoreCase(";") }
+  def StatementDelimiter = ignoreCase(";")
+  def NewLine = optional("\r") ~ "\n"
 
 }

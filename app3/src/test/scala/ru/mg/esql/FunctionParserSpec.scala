@@ -1,10 +1,10 @@
 package ru.mg.esql
 
-import ast.CompoundStatementNode
+import ast.BeginEndNode
 import org.specs.SpecificationWithJUnit
 import statements.FunctionParser
-import org.parboiled.scala.parserunners.ReportingParseRunner
 import scala.io.Source
+import org.parboiled.scala.parserunners.ReportingParseRunner
 
 
 class FunctionParserSpec extends SpecificationWithJUnit {
@@ -82,45 +82,40 @@ class FunctionParserSpec extends SpecificationWithJUnit {
   }
 
   "Function parser" should {
-    "parse internal procedure declaration without body and returns" in {
+    "not parse internal procedure declaration without body and returns" in {
 
       val input = "CREATE PROCEDURE Main ();"
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
-      val decl = result.resultValue
-      decl.text must_== "Main()"
+      result.hasErrors must_== true
 
     }
 
-    "parse internal function declaration without body" in {
+    "not parse internal function declaration without body" in {
 
       val input = "CREATE FUNCTION Main() RETURNS INT;"
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
-      val decl = result.resultValue
-      decl.text must_== "Main() RETURNS INT"
-
+      result.hasErrors must_== true
     }
 
     "parse procedure internal declaration with body and no params" in {
 
       val input =
-        """
-        CREATE PROCEDURE Main() -- This is cool
-        BEGIN
-        END;
+        """CREATE PROCEDURE Main() -- This is cool
+           BEGIN
+           END;
         """
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
       val decl = result.resultValue
       decl.text must_== "Main()"
       decl.statements.size must_== 2
-      decl.statements(1).isInstanceOf[CompoundStatementNode] must_== true
+      decl.statements(1).isInstanceOf[BeginEndNode] must_== true
     }
 
     "parse function declaration with specified language" in {
-      val input = """
-      CREATE PROCEDURE Main() LANGUAGE ESQL
+      val input = """CREATE PROCEDURE Main() LANGUAGE ESQL
       BEGIN
       END;
       """
@@ -129,7 +124,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
       val decl = result.resultValue
       decl.text must_== "Main() LANGUAGE ESQL"
       decl.statements.size must_== 1
-      decl.statements(0).isInstanceOf[CompoundStatementNode] must_== true
+      decl.statements(0).isInstanceOf[BeginEndNode] must_== true
     }
   }
 
@@ -141,9 +136,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
     result.resultValue.startLine must_== 1
     result.resultValue.statements.length must_== 1
 
-    result.resultValue.statements(0).isInstanceOf[CompoundStatementNode] must_== true
-    val body = result.resultValue.statements(0).asInstanceOf[CompoundStatementNode]
-    body.statements.length must_== 4
+    result.resultValue.statements(0).isInstanceOf[BeginEndNode] must_== true
   }
 
   "parse function from file function2.esql" in {
@@ -153,10 +146,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
     result.hasErrors must_== false
     result.resultValue.startLine must_== 1
     result.resultValue.statements.length must_== 1
-
-//    result.resultValue.statements(0).isInstanceOf[CompoundStatementNode] must_== true
-//    val body = result.resultValue.statements(0).asInstanceOf[CompoundStatementNode]
-//    body.statements.length must_== 3
+    result.resultValue.statements(0).isInstanceOf[BeginEndNode] must_== true
   }
 
 }

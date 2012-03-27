@@ -1,14 +1,14 @@
 package ru.mg.esql.statements
 
-import org.parboiled.scala.rules.Rule1
+import org.parboiled.scala._
 import ru.mg.esql.ast.AstNode._
 import ru.mg.esql.ast.FunctionNode
 
 
-trait FunctionParser extends CompoundStatementParser {
+trait FunctionParser extends StatementParser {
 
   def FunctionStatement: Rule1[FunctionNode] = rule {
-    WS ~ CREATE ~ (PROCEDURE | FUNCTION) ~ FunctionSignature ~ FunctionBody ~~> withContext(functionNode)
+    CREATE ~ (PROCEDURE | FUNCTION) ~ FunctionSignature ~ FunctionBody ~~> withContext(functionNode)
   }
 
   def FunctionSignature: Rule1[String] = rule {
@@ -21,20 +21,20 @@ trait FunctionParser extends CompoundStatementParser {
 
   
   def ParamsDecl: Rule1[String] = rule {
-    "(" ~ zeroOrMore(noneOf(")")) ~> { "(" + _ + ")" } ~ ")" ~ WS
+    "(" ~ zeroOrMore(!")" ~ ANY) ~> { "(" + _ + ")" } ~ ")" ~ WS
   }
   
   def FunctionLanguage: Rule1[String] = rule {
-    LANGUAGE ~ (ESQL | DATABASE | JAVA) ~> { " LANGUAGE " + _ }
+    LANGUAGE ~ (ESQL | DATABASE | JAVA) ~> { " LANGUAGE " + _ } ~ WS
   }
   
   def FunctionReturn: Rule1[String] = rule {
-    RETURNS ~ TypeDecl ~> { " RETURNS " + _ }
+    RETURNS ~ TypeDecl ~> { " RETURNS " + _ } ~ WS
   }
   
   def FunctionBody = rule {
-    zeroOrMore(BeginEndStatement | Comment)
+    oneOrMore((BeginEndStatement | Comment) ~ WS)
   }
 
-  def FunctionName = rule { Identifier ~> { _.toString } ~ WS }
+  def FunctionName = rule { Identifier ~> { _.toString } }
 }

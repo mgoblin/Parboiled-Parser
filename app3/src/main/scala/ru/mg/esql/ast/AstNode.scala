@@ -32,11 +32,10 @@ object AstNode {
       new BlockCommentNode(text.trim(), lineNo)
   }
 
-  def compoundStatementNode = {
-     (body: List[AstNode],
-     context: Context[_]) =>
+  def beginEndNode = {
+     (body: String, context: Context[_]) =>
         val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
-        new CompoundStatementNode("BEGIN END", lineNo, body)
+        new BeginEndNode(body, lineNo)
 
   }
 
@@ -44,38 +43,27 @@ object AstNode {
 
 sealed abstract class AstNode(val text: String, val startLine: Long)
 
-abstract case class CompoundNode (
- override val text: String,
- override val startLine: Long,
- statements: List[AstNode])
-extends AstNode(text, startLine)
-
-abstract case class SimpleNode (
-  override val text: String,
-  override val startLine: Long)
-extends AstNode(text, startLine)
-
 case class ModuleNode(
   override val text: String,
   override val startLine: Long,
-  override val statements: List[AstNode])
-extends CompoundNode(text, startLine, statements)
+  statements: List[AstNode])
+extends AstNode(text, startLine)
 
 case class FunctionNode(
   override val text: String,
   override val startLine: Long,
-  override val statements: List[AstNode])
-extends CompoundNode(text, startLine, statements)
+  statements: List[AstNode])
+extends AstNode(text, startLine)
 
 case class LineStatementNode(
   override val text: String,
   override val startLine: Long)
-extends SimpleNode(text, startLine)
+extends AstNode(text, startLine)
 
 abstract case class CommentNode(
   override val text: String,
   override val startLine: Long)
-extends SimpleNode(text, startLine)
+extends AstNode(text, startLine)
 
 case class LineCommentNode(
   override val text: String,
@@ -87,8 +75,7 @@ case class BlockCommentNode (
   override val startLine: Long
 ) extends CommentNode(text, startLine)
 
-case class CompoundStatementNode (
+case class BeginEndNode (
   override val text: String,
-  override val startLine: Long,
-  override val statements: List[AstNode]
-) extends CompoundNode(text, startLine, statements)
+  override val startLine: Long
+) extends AstNode(text, startLine)
