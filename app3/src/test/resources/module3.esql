@@ -3,7 +3,7 @@ CREATE COMPUTE MODULE Routing_using_memory_cache_Compute
       comment
     */
     DECLARE Variable1 CHAR 'SAMPLE_QUEUES';
-    -- Hard coded value
+    -- Hard coded value END MODULE;
 
 	CREATE FUNCTION Main() RETURNS BOOLEAN
 	BEGIN

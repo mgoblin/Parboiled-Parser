@@ -54,6 +54,8 @@ trait ReservedWordsParser extends Parser {
   def BEGIN = ignoreCase("BEGIN")
   def EXTERNAL = ignoreCase ("EXTERNAL") ~ WS
   def NAME = ignoreCase ("NAME") ~ WS
+  def COMPUTE = ignoreCase("COMPUTE") ~ WS
+  def FILTER = ignoreCase("FILTER") ~ WS
 
   /**
    * We redefine the default string-to-rule conversion to also match trailing whitespace if the string ends with

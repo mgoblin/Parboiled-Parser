@@ -12,15 +12,11 @@ trait ModuleParser extends FunctionParser {
 
   def ModuleHeader = rule {
     def join = { x: String => x.split(" ").map(_.trim()).filter(!_.isEmpty).mkString(" ") }
-    CREATE ~ ModuleType ~ MODULE ~ ModuleName ~ WS ~> join
-  }
-
-  def ModuleType = rule {
-    (ignoreCase("COMPUTE") | ignoreCase("DATABASE") | ignoreCase("FILTER")) ~ WS
+    CREATE ~ (COMPUTE | DATABASE | FILTER) ~ MODULE ~ ModuleName ~ WS ~> join
   }
 
   def ModuleFooter = rule {
-    ignoreCase("END") ~ WS ~ ignoreCase("MODULE") ~ WS ~> { _ => "END MODULE" } ~ StatementDelimiter
+    END ~ MODULE ~> { _ => "END MODULE" } ~ StatementDelimiter
   }
 
   def ModuleBody = rule {
