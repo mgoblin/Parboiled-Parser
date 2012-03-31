@@ -57,6 +57,9 @@ trait ReservedWordsParser extends Parser {
   def COMPUTE = ignoreCase("COMPUTE") ~ WS
   def FILTER = ignoreCase("FILTER") ~ WS
   def DECLARE = ignoreCase("DECLARE") ~ WS
+  def BROKER = ignoreCase("BROKER") ~ WS
+  def SCHEMA = ignoreCase("SCHEMA") ~ WS
+  def PATH = ignoreCase("PATH") ~ WS
 
   /**
    * We redefine the default string-to-rule conversion to also match trailing whitespace if the string ends with

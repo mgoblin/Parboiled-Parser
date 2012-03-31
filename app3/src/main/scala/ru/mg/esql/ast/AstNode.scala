@@ -7,7 +7,7 @@ object AstNode {
   def moduleNode = {
     (header: String, statements: List[AstNode], footer: String, context: Context[_]) =>
       val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
-      new ModuleNode(header.trim(), lineNo, statements)
+      new ModuleNode(header, lineNo, statements)
   }
 
   def functionNode = {
@@ -36,14 +36,26 @@ object AstNode {
   def beginEndNode = {
      (body: String, context: Context[_]) =>
         val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
-        new BeginEndNode(body, lineNo)
+        new BeginEndNode(body.trim, lineNo)
 
   }
 
   def externalNode  = {
     (body: String, context: Context[_]) =>
       val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
-      List(new ExternalNode(body, lineNo))
+      List(new ExternalNode(body.trim, lineNo))
+  }
+
+  def schemaNode  = {
+    (text: String, context: Context[_]) =>
+      val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
+      new SchemaNode(text, lineNo)
+  }
+
+  def pathNode  = {
+    (text: String, context: Context[_]) =>
+      val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
+      new PathNode(text, lineNo)
   }
 
 }
@@ -88,6 +100,16 @@ case class BeginEndNode (
 ) extends AstNode(text, startLine)
 
 case class ExternalNode (
+  override val text: String,
+  override val startLine: Long
+) extends AstNode(text, startLine)
+
+case class SchemaNode (
+  override val text: String,
+  override val startLine: Long
+) extends AstNode(text, startLine)
+
+case class PathNode (
   override val text: String,
   override val startLine: Long
 ) extends AstNode(text, startLine)

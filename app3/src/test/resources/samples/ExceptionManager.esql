@@ -1,0 +1,16 @@
+BROKER SCHEMA ru.croc.sbrf.mdm.common
+
+-- Получение описания ошибки
+CREATE PROCEDURE GetExcDescription(IN InputExcList REFERENCE, OUT sErrDescr CHARACTER, OUT sErrNumber CHARACTER)
+BEGIN
+	DECLARE ex REFERENCE TO InputExcList.*[<];
+	WHILE ex.*[<].Number IS NOT NULL DO
+		MOVE ex LASTCHILD;
+	END WHILE;
+	SET sErrNumber = ex.Number;
+	SET sErrDescr =
+		'[' || CAST(ex.Number AS CHARACTER) || '] ' || ex.Text || ': ';
+	FOR ins AS ex.Insert[] DO
+		SET sErrDescr = sErrDescr || ins.Text;
+	END FOR;
+END;

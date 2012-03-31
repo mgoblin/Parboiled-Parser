@@ -12,10 +12,6 @@ class ESQLParserSpec extends SpecificationWithJUnit {
     override val buildParseTree = true
   }
 
-  def parse(input: String) = {
-    ReportingParseRunner(parser.ESQLFile).run(input)
-  }
-
   "ESQL parser" should {
 
     "parse file variable declaration" in {
@@ -23,13 +19,12 @@ class ESQLParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.Statement).run(input)
 
       result.hasErrors mustBe false
-      result.parseTreeRoot mustNotBe null
-      result.parseTreeRoot.getChildren mustNotBe empty
+      result.resultValue.text must_== "CacheQueueTable SHARED ROW"
     }
 
     "parse file with line comment" in {
       val input = "-- This is a comment"
-      val result = parse(input)
+      val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors mustBe false
       result.parseTreeRoot mustNotBe null
@@ -42,7 +37,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
         """-- This is a comment
         declare CacheQueueTable SHARED ROW; -- a shared variable that can be used by instances of a flow
         """
-      val result = parse(input)
+      val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors mustBe false
       result.parseTreeRoot mustNotBe null
@@ -53,7 +48,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
       val input =
         "CREATE COMPUTE MODULE Routing_using_memory_cache_Compute \n" +
           "END MODULE;\n\n"
-      val result = parse(input)
+      val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors mustBe false
       result.parseTreeRoot mustNotBe null
@@ -73,6 +68,19 @@ class ESQLParserSpec extends SpecificationWithJUnit {
       result.resultValue(3).isInstanceOf[ModuleNode] must_== true
 
     }
+
+    "parse samples/ExceptionManager.esql" in {
+      val input = Source.fromURL(getClass.getResource("/samples/ExceptionManager.esql")).getLines().mkString("\n")
+      val result = ReportingParseRunner(parser.ESQLFile).run(input)
+
+      result.hasErrors must_== false
+      result.resultValue.length must_== 3
+      result.resultValue(0).isInstanceOf[SchemaNode] must_== true
+      result.resultValue(1).isInstanceOf[LineCommentNode] must_== true
+      result.resultValue(2).isInstanceOf[FunctionNode] must_== true
+
+    }
+
 
   }
 }
