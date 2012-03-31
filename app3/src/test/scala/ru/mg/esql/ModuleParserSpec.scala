@@ -1,10 +1,10 @@
 package ru.mg.esql
 
-import ast.FunctionNode
+import ast.{LineStatementNode, CommentNode, FunctionNode}
 import org.specs.SpecificationWithJUnit
 import statements.ModuleParser
 import io.Source
-import org.parboiled.scala.parserunners.ReportingParseRunner
+import org.parboiled.scala._
 
 
 class ModuleParserSpec extends SpecificationWithJUnit {
@@ -36,11 +36,32 @@ class ModuleParserSpec extends SpecificationWithJUnit {
     }
 
     "parse module with comment and function" in {
-      fail("not implemented yet")
+      val input = Source.fromURL(getClass.getResource("/module2.esql")).getLines().mkString("\n")
+      val result = ReportingParseRunner(parser.ModuleStatement).run(input)
+
+      result.hasErrors must_== false
+      result.resultValue.startLine must_== 1
+      result.resultValue.statements.length must_== 5
+      result.resultValue.statements(0).isInstanceOf[CommentNode] must_== true
+      result.resultValue.statements(1).isInstanceOf[CommentNode] must_== true
+      result.resultValue.statements(2).isInstanceOf[FunctionNode] must_== true
+      result.resultValue.statements(3).isInstanceOf[FunctionNode] must_== true
+      result.resultValue.statements(3).isInstanceOf[FunctionNode] must_== true
     }
 
     "parse module with global vars and functions" in {
-      fail("not implemented yet")
+      val input = Source.fromURL(getClass.getResource("/module3.esql")).getLines().mkString("\n")
+      val result = ReportingParseRunner(parser.ModuleStatement).run(input)
+
+      result.hasErrors must_== false
+      result.resultValue.startLine must_== 1
+      result.resultValue.statements.length must_== 6
+      result.resultValue.statements(0).isInstanceOf[CommentNode] must_== true
+      result.resultValue.statements(1).isInstanceOf[LineStatementNode] must_== true
+      result.resultValue.statements(2).isInstanceOf[CommentNode] must_== true
+      result.resultValue.statements(3).isInstanceOf[FunctionNode] must_== true
+      result.resultValue.statements(4).isInstanceOf[FunctionNode] must_== true
+      result.resultValue.statements(5).isInstanceOf[FunctionNode] must_== true
     }
   }
 

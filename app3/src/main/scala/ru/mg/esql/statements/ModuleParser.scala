@@ -7,7 +7,7 @@ import org.parboiled.scala._
 trait ModuleParser extends FunctionParser {
   
   def ModuleStatement = rule {
-    (ModuleHeader ~ ModuleBody ~ ModuleFooter ~ StatementDelimiter) ~~> withContext(moduleNode)
+    (ModuleHeader ~ ModuleBody ~ ModuleFooter) ~~> withContext(moduleNode)
   }
 
   def ModuleHeader = rule {
@@ -20,15 +20,15 @@ trait ModuleParser extends FunctionParser {
   }
 
   def ModuleFooter = rule {
-    ignoreCase("END") ~ WS ~ ignoreCase("MODULE") ~ WS ~> { _ => "END MODULE" }
+    ignoreCase("END") ~ WS ~ ignoreCase("MODULE") ~ WS ~> { _ => "END MODULE" } ~ StatementDelimiter
   }
 
   def ModuleBody = rule {
-    zeroOrMore(FunctionStatement | Comment | moduleLineStatement) ~ WS
+    zeroOrMore((Comment | FunctionStatement | moduleLineStatement) ~ WS)
   }
 
   def moduleLineStatement = rule {
-    zeroOrMore(!(ModuleFooter) ~ ANY) ~> withContext(lineStatementNode) ~ StatementDelimiter
+    zeroOrMore(!(ModuleFooter | StatementDelimiter ~> { _.toString }) ~ ANY) ~> withContext(lineStatementNode) ~ StatementDelimiter
   }
 
   def ModuleName = Identifier
