@@ -1,0 +1,431 @@
+BROKER SCHEMA ru.croc.sbrf.mdm.common
+
+PATH ru.croc.sbrf.mdm.common;
+
+DECLARE EMPTY_ATTRIBUTE CONSTANT CHARACTER '_empty_';
+
+CREATE PROCEDURE recodeAgreemtInfo(IN sysId CHARACTER, IN toMdm BOOLEAN, IN agreemtInfo REFERENCE)
+BEGIN
+	IF LASTMOVE(agreemtInfo) THEN
+		DECLARE ctx ROW;
+		CALL initContext(ctx, agreemtInfo, sysId);
+
+		CALL recode(agreemtInfo, 'AgreemtNum', NULL, TRUE, TRUE, TRUE, FALSE, ctx);
+		CALL recode(agreemtInfo, 'AgreemtType', 'CDAGREEMENTTP', TRUE, TRUE, TRUE, FALSE, ctx);
+		CALL recode(agreemtInfo, 'Status', 'CDAGREEMENTSTTP', TRUE, FALSE, FALSE, FALSE, ctx);
+		CALL recode(agreemtInfo, 'ProductCurrency', 'CDCURRENCYTP', TRUE, TRUE, TRUE, FALSE, ctx);
+		CALL recode(agreemtInfo, 'BranchNum', 'CDSBSUBDIVISIONTP', TRUE, TRUE, TRUE, FALSE, ctx);
+
+		FOR info AS agreemtInfo.LoanInfo[] DO
+			CALL recodeAgreemtComponentInfo(info, ctx);
+		END FOR;
+
+		FOR info AS agreemtInfo.DepInfo[] DO
+			CALL recodeAgreemtComponentInfo(info, ctx);
+		END FOR;
+
+		FOR info AS agreemtInfo.CardInfo[] DO
+			CALL recodeAgreemtComponentInfo(info, ctx);
+		END FOR;
+
+		FOR info AS agreemtInfo.ServiceInfo[] DO
+			CALL recodeAgreemtComponentInfo(info, ctx);
+		END FOR;
+
+		FOR rel AS agreemtInfo.Agreemt2Agreemt[] DO
+			CALL recode(rel, 'AgreemtNum', NULL, TRUE, TRUE, TRUE, FALSE, ctx);
+			CALL recode(rel, 'AgreemtType', 'CDAGREEMENTTP', TRUE, TRUE, TRUE, FALSE, ctx);
+			CALL recode(rel, 'BranchNum', 'CDSBSUBDIVISIONTP', TRUE, TRUE, TRUE, FALSE, ctx);
+			CALL recode(rel, 'LinkType', 'CDCONTRACTRELTP', TRUE, TRUE, TRUE, FALSE, ctx);
+		END FOR;
+
+		CALL logEvents(ctx, agreemtInfo);
+	END IF;
+END;
+
+CREATE PROCEDURE recodeAgreemtComponentInfo(IN acInfo REFERENCE, IN ctx REFERENCE)
+BEGIN
+	CALL recode(acInfo, 'ProdType', 'CDPRODTP', TRUE, FALSE, TRUE, FALSE, ctx);
+	FOR ci AS acInfo.CustId[] DO
+		CALL recode(ci, 'Role', 'CDCONTRACTROLETP', TRUE, TRUE, TRUE, FALSE, ctx);
+	END FOR;
+END;
+
+CREATE PROCEDURE recodeCustRec(IN sysId CHARACTER, IN toMdm BOOLEAN, IN custRec REFERENCE)
+BEGIN
+	IF LASTMOVE(custRec) THEN
+		CALL recodeCustInfo(sysId, toMdm, custRec.CustInfo);
+	END IF;
+END;
+
+CREATE PROCEDURE recodeCustInfo(IN sysId CHARACTER, IN toMdm BOOLEAN, IN custInfo REFERENCE)
+BEGIN
+	IF LASTMOVE(custInfo) THEN
+		DECLARE ctx ROW;
+		CALL initContext(ctx, custInfo, sysId);
+
+		FOR cursor AS custInfo.PersonInfo.ContactInfo.ContactData[] DO
+			CALL recode(cursor, 'ContactPref', 'CDCONTMETHCAT', TRUE, FALSE, TRUE, FALSE, ctx);
+			CALL recode(cursor, 'ContactType', 'CDCONTMETHTP', TRUE, TRUE, TRUE, FALSE, ctx);
+			CALL recode(cursor, 'ContactNum', NULL, TRUE, TRUE, TRUE, FALSE, ctx);
+		END FOR;
+
+		FOR cursor AS custInfo.PersonInfo.ContactInfo.PostAddr[] DO
+			CALL recode(cursor, 'AddrType', 'CDADDRUSAGETP', TRUE, TRUE, TRUE, FALSE, ctx);
+			CALL recode(cursor, 'Country', 'CDCOUNTRYTP', FALSE, FALSE, FALSE, FALSE, ctx);
+			CALL recode(cursor, 'Addr3', NULL, TRUE, TRUE, FALSE, TRUE, ctx);
+			CALL recode(cursor, 'City', NULL, TRUE, TRUE, FALSE, TRUE, ctx);
+			CALL recodeBool(toMdm, cursor.AddrStatus);
+		END FOR;
+	
+		IF NOT toMdm THEN
+			CALL identityCardToTaxId(custInfo);
+		END IF;
+
+		FOR cursor AS custInfo.PersonInfo.IdentityCard[] DO
+			CALL recode(cursor, 'IdType', 'CDIDTP', TRUE, TRUE, TRUE, FALSE, ctx);
+			CALL recode(cursor, 'IdStatus', 'CDIDSTATUSTP', TRUE, FALSE, TRUE, FALSE, ctx);
+
+			IF(cursor.IdNum IS NULL OR TRIM(cursor.IdNum) = '') THEN
+				SET cursor.IdNum = cursor.IdSeries;
+				SET cursor.IdSeries = NULL;
+			END IF;
+
+			CALL recode(cursor, 'IdNum', NULL, TRUE, FALSE, TRUE, FALSE, ctx);
+		END FOR;
+		
+		IF toMdm THEN
+			CALL taxIdToIdentityCard(custInfo);
+		END IF;
+
+		FOR cursor AS custInfo.PersonInfo.EmploymentHistory[] DO
+			CALL recodeBool(toMdm, cursor.PrimaryJob);
+			CREATE FIELD cursor.OrgInfo;
+			CALL recode(cursor.OrgInfo, 'LegalName', NULL, TRUE, TRUE, FALSE, TRUE, ctx);
+			CALL recode(cursor, 'JobTitle', NULL, TRUE, TRUE, FALSE, TRUE, ctx);
+		END FOR;
+	
+		FOR cursor AS custInfo.Cust2CustInfo[] DO
+			CALL recode(cursor, 'LinkType', 'CDRELTP', TRUE, TRUE, TRUE, FALSE, ctx);
+		END FOR;
+
+		CALL recode(custInfo.PersonInfo.PersonName, 'LastName', NULL, TRUE, FALSE, TRUE, FALSE, ctx);
+		CALL recode(custInfo.PersonInfo, 'MaritalStatus', 'CDMARITALSTTP', FALSE, FALSE, TRUE, FALSE, ctx);
+		CALL recode(custInfo.PersonInfo, 'BankRel', 'CDSBBANKRELTP', FALSE, FALSE, TRUE, FALSE, ctx);
+		CALL recode(custInfo.PersonInfo, 'SocialCategory', 'CDSBSOCIALGROUPTP', FALSE, FALSE, TRUE, FALSE, ctx);
+		CALL recode(custInfo.PersonInfo, 'Gender', 'gender_tp_code', FALSE, FALSE, TRUE, FALSE, ctx);
+		CALL recode(custInfo.PersonInfo, 'CitizenShip', 'CDCOUNTRYTP', FALSE, FALSE, FALSE, FALSE, ctx);
+		CALL recode(custInfo.PersonInfo, 'Education', 'CDHIGHESTEDUTP', FALSE, FALSE, TRUE, FALSE, ctx);
+		CALL recode(custInfo.PersonInfo, 'BranchNum', 'CDSBSUBDIVISIONTP', FALSE, FALSE, FALSE, FALSE, ctx);
+		CALL recode(custInfo.PersonInfo, 'VIPStatus', 'CDCLIENTIMPTP', FALSE, FALSE, TRUE, FALSE, ctx);
+		CALL recode(custInfo.CustStatus, 'CustStatusCode', 'CDCLIENTSTTP', FALSE, FALSE, TRUE, FALSE, ctx);
+
+		IF(custInfo.PersonInfo.Birthday = '1800-01-01' OR 
+		   custInfo.PersonInfo.Birthday = '1900-01-01')
+		THEN
+			CALL putInContext(ctx, EVENT_INVALID_BIRTH_DATE, custInfo.PersonInfo, 'Birthday',
+				custInfo.PersonInfo.Birthday, NULL, FALSE);
+			SET custInfo.PersonInfo.Birthday = NULL;
+		END IF;
+
+		CALL recodeBool(toMdm, custInfo.PersonInfo.Resident);
+		CALL recodeBool(toMdm, custInfo.PersonInfo.Employee);
+		CALL recodeBool(toMdm, custInfo.PersonInfo.Shareholder);
+		CALL recodeBool(toMdm, custInfo.PersonInfo.Insider);
+		
+		CALL recodeBool(toMdm, custInfo.PersonInfo.Literacy);
+		CALL recodeBool(toMdm, custInfo.PersonInfo.ForeignOfficial);
+		CALL recodeBool(toMdm, custInfo.PersonInfo.CreditHistory);		
+		CALL recodeBool(toMdm, custInfo.PersonInfo.Denials);
+		CALL recodeBool(toMdm, custInfo.PersonInfo.Undesired);
+		CALL recodeBool(toMdm, custInfo.PersonInfo.InStopList);
+
+		CALL logEvents(ctx, custInfo);
+	END IF;
+END;
+
+CREATE PROCEDURE recodeXferInfo(IN sysId CHARACTER, IN toMdm BOOLEAN, IN xferInfo REFERENCE)
+BEGIN
+	IF LASTMOVE(xferInfo) THEN
+		DECLARE ctx ROW;
+		CALL initContext(ctx, xferInfo, sysId);
+
+--		CALL recode(xferInfo, 'OrgCodeTo', 'CDSB4000TP', FALSE, FALSE, FALSE, FALSE, ctx);
+
+		CALL recode(xferInfo.BankAcctIdFrom, 'AcctId', NULL, TRUE, TRUE, FALSE, TRUE, ctx);
+
+		DECLARE parent REFERENCE TO xferInfo;
+		MOVE parent PARENT;
+		CALL recode(parent.RecModelInfo, 'Nickname', NULL, TRUE, TRUE, FALSE, TRUE, ctx);
+
+		CALL logEvents(ctx, xferInfo);
+	END IF;
+END;
+
+-- ������������ �������� �������� ����� � ���������
+/*
+IN entityRef REFERENCE  	- ������ �� ��������
+IN fieldName CHARACTER  	- �������������� �������
+IN mdmDict CHARACTER    	- ���������� ��� ��� NULL, ���� ������������ �� �����
+IN mandatoryForAdd BOOLEAN	- TRUE, ���� ���� ����������� � ����������� ���������� (...AddRq)
+IN mandatoryForMod BOOLEAN	- TRUE, ���� ���� ����������� � ����������� ���������� (...ModRq)
+IN haltOnError BOOLEAN		- ���� TRUE, �� ������������� ������ �������� � ������ � ������ 
+							  ������� � ��������� ����������. �����, ���������� ������������.
+IN stubOnEmpty BOOLEAN		- ���� TRUE, �� ������������ ������������ ������� ���������� ���������
+IN ctx REFERENCE			- �������� �������������, ���� ������������ ��������� �� �������
+*/
+CREATE PROCEDURE recode(IN entityRef REFERENCE, IN fieldName CHARACTER, IN mdmDict CHARACTER,
+	IN mandatoryForAdd BOOLEAN, IN mandatoryForMod BOOLEAN,
+	IN haltOnError BOOLEAN, IN stubOnEmpty BOOLEAN, IN ctx REFERENCE)
+BEGIN
+	DECLARE fieldRef REFERENCE TO entityRef.{fieldName};
+	DECLARE oldValue CHARACTER TRIM(FIELDVALUE(fieldRef));
+	DECLARE newValue CHARACTER oldValue;
+	DECLARE stub CHARACTER EMPTY_ATTRIBUTE;
+
+	-- ��������� ������ ��������
+	IF NOT LASTMOVE(fieldRef) OR oldValue IS NULL OR LENGTH(oldValue) = 0 THEN
+		IF (mandatoryForAdd AND ctx.isAdd) OR (mandatoryForMod AND ctx.isMod) THEN
+			-- �������� ������ ������� ��������
+			IF stubOnEmpty AND ctx.direction = 'tomdm' THEN
+				IF LASTMOVE(entityRef) AND NOT LASTMOVE(fieldRef) THEN
+					CREATE FIELD entityRef.{fieldName} AS fieldRef;
+				END IF;
+				SET newValue = stub;
+			END IF;
+
+			CALL putInContext(ctx, EVENT_EMPTY_FIELD, entityRef, fieldName, oldValue, newValue, haltOnError);
+		END IF;
+
+	-- ������������� ��������
+	ELSEIF mdmDict IS NOT NULL THEN
+		TABLE_CACHE_LOCK : BEGIN ATOMIC
+			CALL InitExtKeyCache();
+			SET newValue = TableCache.EXTKEY.{mdmDict}.{ctx.sysId}.{ctx.direction}.{UPPER(oldValue)};
+		END TABLE_CACHE_LOCK;
+
+		IF ctx.direction = 'tomdm' THEN
+			IF newValue IS NULL THEN
+				SET newValue = oldValue || getRecodingFailedFlag() || '';
+			ELSE
+				SET newValue = oldValue || getRecodingPassedFlag() || newValue;
+			END IF;
+		END IF;
+
+	-- ������ �������� ������ ��������
+	ELSEIF stubOnEmpty AND ctx.direction = 'frommdm' AND oldValue = stub THEN
+		SET newValue = '';
+	END IF;
+
+	SET fieldRef VALUE = newValue;
+END;
+
+-- ����������� TaxId � IdentityCard (���)
+CREATE PROCEDURE taxIdToIdentityCard(IN custInfo REFERENCE)
+BEGIN
+	IF LASTMOVE(custInfo) THEN
+		-- ������� ��� ����� �� ����������
+		IF custInfo.PersonInfo.TaxId IS NOT NULL THEN
+			IF CARDINALITY(custInfo.PersonInfo.IdentityCard[]) > 0 THEN
+				CREATE NEXTSIBLING OF custInfo.PersonInfo.IdentityCard[<] TYPE Name NAME 'IdentityCard';
+			ELSE
+				CREATE LASTCHILD OF custInfo.PersonInfo TYPE Name NAME 'IdentityCard';
+			END IF;
+			SET custInfo.PersonInfo.IdentityCard[<].IdNum = custInfo.PersonInfo.TaxId;
+			SET custInfo.PersonInfo.IdentityCard[<].IssueDt = custInfo.PersonInfo.IssueDt;
+			-- ��� � ������ ������������� ��� ����������������� � MDM
+			SET custInfo.PersonInfo.IdentityCard[<].IdType = '1011';
+			SET custInfo.PersonInfo.IdentityCard[<].IdStatus = '1';
+			SET custInfo.PersonInfo.TaxId = NULL;
+			SET custInfo.PersonInfo.IssueDt = NULL;
+		END IF;		
+	END IF;
+END;
+
+-- ����������� IdentityCard (���) � TaxId
+CREATE PROCEDURE identityCardToTaxId(IN custInfo REFERENCE)
+BEGIN
+	IF LASTMOVE(custInfo) THEN
+		DECLARE taxIdRow ROW;
+		-- ��������� ������ �� ��� �� ����� ���������� � ������� ��������
+		SET taxIdRow = THE (SELECT ic
+			FROM custInfo.PersonInfo.IdentityCard[] AS ic
+			WHERE ic.IdType = '1011' AND ic.IdStatus = '1');
+
+		IF CARDINALITY(taxIdRow.*[]) > 0 THEN
+			SET custInfo.PersonInfo.TaxId = taxIdRow.IdNum;
+			--SET custInfo.PersonInfo.IssueDt = taxIdRow.IssueDt;
+
+			DECLARE I INTEGER CARDINALITY(custInfo.PersonInfo.IdentityCard[]);
+			WHILE I >= 1 DO
+				IF custInfo.PersonInfo.IdentityCard[I].IdType = '1011' THEN
+					DELETE FIELD custInfo.PersonInfo.IdentityCard[I];
+				END IF;
+				SET I = I - 1;
+			END WHILE;
+		ELSE
+			SET custInfo.PersonInfo.TaxId = NULL;
+			SET custInfo.PersonInfo.IssueDt = NULL;
+		END IF;
+	END IF;
+END;
+
+-- ���������� ������������� ������� ������� (�������� ������� CDADMINSYSTP)
+CREATE FUNCTION getSysId(IN sysName CHARACTER)
+	RETURNS CHARACTER
+BEGIN
+	DECLARE result CHARACTER;
+
+	TABLE_CACHE_LOCK : BEGIN ATOMIC
+		CALL InitAdminSysCache();
+
+		SET result = THE(
+        	SELECT ITEM T.ADMIN_SYS_TP_CD
+       		FROM TableCache.CDADMINSYSTP.rows[] as T
+       		WHERE T.NAME = sysName
+		);
+	END TABLE_CACHE_LOCK;
+
+	IF result IS NULL THEN
+		THROW USER EXCEPTION VALUES('Invalid system name: ' || sysName);
+	END IF;
+
+	RETURN result;
+END;
+
+-- ���������� ��� ������� ������� (�������� ������� CDADMINSYSTP)
+CREATE FUNCTION getSysName(IN sysId CHARACTER)
+	RETURNS CHARACTER
+BEGIN
+	DECLARE result CHARACTER;
+
+	TABLE_CACHE_LOCK : BEGIN ATOMIC
+		CALL InitAdminSysCache();
+
+		SET result = THE(
+        	SELECT ITEM T.NAME
+       		FROM TableCache.CDADMINSYSTP.rows[] as T
+       		WHERE T.ADMIN_SYS_TP_CD = sysId
+		);
+	END TABLE_CACHE_LOCK;
+
+	IF result IS NULL THEN
+		THROW USER EXCEPTION VALUES('Invalid system ID: ' || sysId);
+	END IF;
+
+	RETURN result;
+END;
+
+-- ��������� ������ �������� �� ���������� ������������� � ������ � �������
+CREATE PROCEDURE recodeBool(IN toMdm BOOLEAN, IN val REFERENCE)
+BEGIN
+	IF LASTMOVE(val) THEN
+		-- ������������� �� BOOLEAN � Y/N
+		IF toMdm THEN
+		
+			SET val = CASE WHEN UPPER(val) IN ('1', 'TRUE') THEN 'Y' ELSE 'N' END;
+				
+		-- ������������� �� Y/N � BOOLEAN
+		ELSE
+			
+			SET val = CASE val WHEN 'Y' THEN '1' ELSE '0' END;
+			
+		END IF;
+	END IF;
+END;
+
+
+-- ���������� ����/����� � ������� IFX
+CREATE FUNCTION getIFXDateTime(IN ts CHARACTER) RETURNS CHARACTER
+BEGIN
+
+	RETURN CAST(CAST(ts AS TIMESTAMP) AS CHARACTER FORMAT 'yyyy-MM-dd''T''HH:mm:ss.SSSSSSZZZ');
+	
+END;
+
+create function getIFXDate(IN ts CHARACTER) REturns CHARACTER
+BEGIN
+	RETURN CAST(CAST(ts AS TIMESTAMP) AS CHARACTER FORMAT 'yyyy-MM-dd');
+END;
+
+
+-- ���������� ����� ��������� �� �����/������ � MDM
+CREATE FUNCTION getIdSeriesFromIdentificationNumber(IN idNumber CHARACTER) RETURNS CHARACTER
+BEGIN
+	DECLARE pos INTEGER POSITION(' ' IN idNumber REPEAT -1);
+	IF pos > 0 THEN
+		RETURN TRIM(LEFT(idNumber, pos - 1));
+	ELSE
+		RETURN '';
+	END IF;
+END;
+	
+-- ���������� ����� ��������� �� �����/������ � MDM
+CREATE FUNCTION getIdNumFromIdentificationNumber(IN idNumber CHARACTER) RETURNS CHARACTER
+BEGIN
+	DECLARE pos INTEGER POSITION(' ' IN idNumber REPEAT -1);
+	IF pos > 0 THEN
+		RETURN TRIM(SUBSTRING(idNumber FROM pos + 1));
+	ELSE
+		RETURN TRIM(idNumber);
+	END IF;
+END;
+	
+
+-- ���������� ��� ���� ����� ����� ����������� � MDM (�������� ������� CDCONTRACTRELTP)
+CREATE FUNCTION getContractRelationshipValue(IN relType CHARACTER)
+	RETURNS CHARACTER
+BEGIN
+	DECLARE result CHARACTER;
+
+	TABLE_CACHE_LOCK : BEGIN ATOMIC
+		CALL InitContractRelCache();
+
+		SET result = THE(
+        	SELECT ITEM T.TO_FROM_NAME
+       		FROM TableCache.CDCONTRACTRELTP.rows[] as T
+       		WHERE T.CONTR_REL_TP_CD = relType
+		);
+	END TABLE_CACHE_LOCK;
+
+	IF result IS NULL THEN
+		THROW USER EXCEPTION VALUES('Invalid contract RelationshipType: ' || relType);
+	END IF;
+
+	RETURN result;
+END;
+	
+-- ���������� ��� ���� ����� ����� ��������� � MDM (�������� ������� CDRELTP)
+CREATE FUNCTION getCustomerRelationshipValue(IN relType CHARACTER)
+	RETURNS CHARACTER
+BEGIN
+	DECLARE result CHARACTER;
+
+	TABLE_CACHE_LOCK : BEGIN ATOMIC
+		CALL InitRelCache();
+
+		SET result = THE(
+        	SELECT ITEM T.TO_FROM_NAME
+       		FROM TableCache.CDRELTP.rows[] as T
+       		WHERE T.REL_TP_CD = relType
+		);
+	END TABLE_CACHE_LOCK;
+
+	IF result IS NULL THEN
+		THROW USER EXCEPTION VALUES('Invalid customer RelationshipType: ' || relType);
+	END IF;
+
+	RETURN result;
+END;
+
+-- ���������� ������� ��� �����, �� ��������� �������������
+CREATE FUNCTION getRecodingFailedFlag() RETURNS CHARACTER
+BEGIN
+	RETURN '{RecodingFailed}';
+END;
+
+-- ���������� ������� ��� �����, ��������� �������������
+CREATE FUNCTION getRecodingPassedFlag() RETURNS CHARACTER
+BEGIN
+	RETURN '{RecodingPassed}';
+END;

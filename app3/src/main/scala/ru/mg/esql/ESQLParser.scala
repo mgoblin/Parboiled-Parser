@@ -23,11 +23,11 @@ class ESQLParser extends ModuleParser {
   }
 
   def PathStatement = rule {
-    PATH ~ Path ~ StatementDelimiter ~> withContext{ pathNode } ~ StatementDelimiter ~ WS
+    PATH ~ Path ~> withContext{ pathNode } ~ StatementDelimiter ~ WS
   }
   
   def Path = rule {
-    SchemaName ~ optional("," ~ SchemaName)
+    SchemaName ~ zeroOrMore("," ~ SchemaName) ~ WS
   }
 
   def SchemaName = rule {

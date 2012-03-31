@@ -92,5 +92,17 @@ class ESQLParserSpec extends SpecificationWithJUnit {
       result.resultValue(6).isInstanceOf[FunctionNode] must_== true
 
     }
+
+    "parse samples/Recode.esql" in {
+      val input = Source.fromURL(getClass.getResource("/samples/Recode.esql")).getLines().mkString("\n")
+      val result = ReportingParseRunner(parser.ESQLFile).run(input)
+
+      result.hasErrors must_== false
+      result.resultValue.length must_== 22
+      result.resultValue(0).isInstanceOf[SchemaNode] must_== true
+      result.resultValue(1).isInstanceOf[PathNode] must_== true
+      result.resultValue(4).isInstanceOf[FunctionNode] must_== true
+
+    }
   }
 }
