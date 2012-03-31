@@ -1,0 +1,453 @@
+BROKER SCHEMA ru.croc.sbrf.mdm.common
+DECLARE ENGLISH_LANG EXTERNAL CHARACTER '100';
+DECLARE RUSSIAN_LANG EXTERNAL CHARACTER '2200';
+
+CREATE PROCEDURE EncodeToMDM(IN isCode CHARACTER, IN isElementName CHARACTER, IN entityName CHARACTER, OUT mdmCode CHARACTER, OUT mdmName CHARACTER)
+BEGIN
+	-- переменная для сохранения результатов перекодировки
+	DECLARE refCode ROW;
+	-- результаты выборки имен элемента
+	DECLARE mdmElementName ROW;
+	-- название справочника для перекодировки
+	DECLARE entity CHARACTER;
+	-- результаты выбора систем
+	DECLARE systems ROW;
+	-- идентификатор системы
+	DECLARE systemID CHARACTER;
+	-- первичный ключ в справочнике
+	DECLARE refPK CHARACTER;
+	-- по имени элемента получим название соответствующего справочника
+	SET entity = GetEntityName(entityName);
+	SET refPK = GetRefPK(entityName);
+	-- найдем ИД системы по ее коду
+	SET systems.Codes[] = SELECT ADM.ADMIN_SYS_TP_CD FROM Database.CDADMINSYSTP AS ADM WHERE ADM.NAME = isCode AND ADM.lang_tp_cd = ENGLISH_LANG;
+	IF (CARDINALITY(systems.Codes[]) = 0) THEN
+		THROW USER EXCEPTION MESSAGE 2951 VALUES ('Ошибка перекодировки справочника ' || entityName || '. Не найден код системы. Элемент: ' || isElementName || ', система ' || isCode, '');
+	ELSE
+		SET systemID = systems.Codes[1].ADMIN_SYS_TP_CD;
+		-- найдем код MDM
+		SET refCode.Codes[] = SELECT EXTKEY.MDM_ID  FROM Database.EXTKEY WHERE EXTKEY.ADMIN_SYS_TP_CD = systemID AND EXTKEY.entity_id = entity AND EXTKEY.EXT_ID = isElementName;
+		-- ничего не нашлось, значит, перекодировать не надо, вернем, что есть
+		IF (CARDINALITY(refCode.Codes[]) = 0) THEN
+			set mdmName = isElementName;
+		ELSE
+			-- нашлось
+			SET mdmCode = refCode.Codes[1].MDM_ID;
+			-- получим значение из справочника
+			SET mdmElementName.Names[] = EVAL('SELECT REF.name FROM Database.' || entity || ' AS REF WHERE REF.' || refPK || ' = mdmCode AND REF.lang_tp_cd =RUSSIAN_LANG');
+			IF (CARDINALITY(mdmElementName.Names[]) = 0) THEN
+				THROW USER EXCEPTION MESSAGE 2951 VALUES ('Ошибка перекодировки справочника ' || entityName || '. Не найдена соответствующая запись в справочнике MD. Элемент: ' || isElementName || ', система ' || isCode, '');
+			ELSE
+				SET mdmName = mdmElementName.Names[1].NAME;
+			END IF;
+		END IF;
+	END IF;
+END;
+
+CREATE PROCEDURE EncodeFromMDM(IN isCode CHARACTER, IN mdmName CHARACTER, IN entityName CHARACTER, OUT isElementName CHARACTER)
+BEGIN
+	-- переменная для сохранения результатов перекодировки
+	DECLARE refCode ROW;
+	DECLARE mdmElementName ROW;
+	DECLARE entity CHARACTER;
+	DECLARE systems ROW;
+	-- код элменета в мдм;
+	DECLARE mdmCode CHARACTER;
+	-- идентификатор системы
+	DECLARE systemID CHARACTER;
+	-- по имени элемента получим название соответствующего справочника
+	SET entity = GetEntityName(entityName);
+		-- первичный ключ в справочнике
+	DECLARE refPK CHARACTER;
+	-- по имени элемента получим название соответствующего справочника
+	SET refPK = GetRefPK(entityName);
+	-- найдем ИД системы по ее коду
+	SET systems.Codes[] = SELECT ADM.ADMIN_SYS_TP_CD FROM Database.CDADMINSYSTP AS ADM WHERE ADM.NAME = isCode AND ADM.lang_tp_cd = ENGLISH_LANG;
+	IF (CARDINALITY(systems.Codes[]) = 0) THEN
+		THROW USER EXCEPTION MESSAGE 2951 VALUES ('Ошибка перекодировки справочника ' || entityName || '. Не найден код системы. Элемент: ' || mdmName || ', система ' || isCode, '');
+	ELSE
+		SET systemID = systems.Codes[1].ADMIN_SYS_TP_CD;
+		
+		SET mdmElementName.Names[] = EVAL('SELECT REF.' || refPK || 'AS code FROM Database.' || entity || ' AS REF WHERE REF.name = mdmName AND REF.lang_tp_cd =RUSSIAN_LANG');
+			IF (CARDINALITY(mdmElementName.Names[]) = 0) THEN
+				THROW USER EXCEPTION MESSAGE 2951 VALUES ('Ошибка перекодировки справочника ' || entityName || '. Не найдена соответствующая запись в справочнике MD. Элемент: ' || isElementName || ', система ' || isCode, '');
+			ELSE
+				SET mdmCode = mdmElementName.Names[1].code;
+			END IF;
+		-- найдем код MDM
+		SET refCode.Codes[] = SELECT EXTKEY.EXT_ID FROM Database.EXTKEY WHERE EXTKEY.ADMIN_SYS_TP_CD = systemID AND EXTKEY.entity_id = entity AND EXTKEY.MDM_ID = mdmCode;
+		-- ничего не нашлось, выкинем эксепшн
+		IF (CARDINALITY(refCode.Codes[]) = 0) THEN
+			set isElementName = mdmName;
+		ELSE
+			-- нашлось
+			SET isElementName = refCode.Codes[1].EXT_ID;
+		END IF;
+	END IF;
+END;
+
+CREATE FUNCTION GetEntityName (IN entity CHARACTER) RETURNS CHARACTER
+BEGIN
+	DECLARE entityName CHARACTER '';
+	IF (entity = 'CitizenShip' OR entity = 'BirthPlace' OR entity = 'Country') THEN
+		SET entityName = 'CDCOUNTRYTP';
+	ELSEIF (entity = 'MaritalStatus') THEN
+		SET entityName = 'CDMARITALSTTP';
+	ELSEIF (entity = 'Education') THEN
+		SET entityName = 'CDHIGHESTEDUTP';
+	ELSEIF (entity = 'SocialCategory') THEN
+		SET entityName = 'CDSBSOCIALGROUPTP';
+	ELSEIF (entity = 'IdType') THEN
+		SET entityName = 'CDIDTP';
+	ELSEIF (entity = 'AddrType') THEN
+		SET entityName = 'CDADDRUSAGETP';
+	ELSEIF (entity = 'ContactType') THEN
+		SET entityName = 'CDCONTMETHTP';
+	ELSEIF (entity = 'BranchNum') THEN
+		SET entityName = 'CDSBSUBDIVISIONTP';
+	ELSEIF (entity = 'AgreemtType') THEN
+		SET entityName = 'CDPRODTP';
+	ELSEIF (entity = 'OrgCodeTo') THEN
+		SET entityName = 'CDSB4000TP';
+	ELSE
+		THROW USER EXCEPTION MESSAGE 2951 VALUES ('Ошибка перекодировки справочника ' || entity || '. Для данного элемента отсутствует соответствующий справочник MDM', '');
+	END IF;
+	RETURN entityName;
+END;
+
+
+CREATE FUNCTION GetRefPK (IN entity CHARACTER) RETURNS CHARACTER
+BEGIN
+	DECLARE refPK CHARACTER '';
+	IF (entity = 'CitizenShip' OR entity = 'BirthPlace' OR entity = 'Country') THEN
+		SET refPK = 'COUNTRY_TP_CD';
+	ELSEIF (entity = 'MaritalStatus') THEN
+		SET refPK = 'MARITAL_ST_TP_CD';
+	ELSEIF (entity = 'Education') THEN
+		SET refPK = 'HIGHEST_EDU_TP_CD';
+	ELSEIF (entity = 'SocialCategory') THEN
+		SET refPK = 'SB_SOCIAL_GROUP_TP_CD';
+	ELSEIF (entity = 'IdType') THEN
+		SET refPK = 'ID_TP_CD';
+	ELSEIF (entity = 'AddrType') THEN
+		SET refPK = 'ADDR_USAGE_TP_CD';
+	ELSEIF (entity = 'ContactType') THEN
+		SET refPK = 'CONT_METH_TP_CD';
+	ELSEIF (entity = 'BranchNum') THEN
+		SET refPK = 'SB_SUBDIVISION_TP_CD';
+	ELSEIF (entity = 'ProdType') THEN
+		SET refPK = 'PROD_TP_CD';
+	ELSEIF (entity = 'OrgCodeTo') THEN
+		SET refPK = 'SB_4000_TP_CD';
+	ELSE
+		THROW USER EXCEPTION MESSAGE 2951 VALUES ('Ошибка перекодировки справочника ' || entity || '. Для данного элемента отсутствует соответствующий справочник MDM', '');
+	END IF;
+	RETURN refPK;
+END;
+
+CREATE FUNCTION EncodeGender (IN gender CHARACTER) RETURNS CHARACTER
+BEGIN
+	DECLARE genderEncoded CHARACTER;
+	IF (gender = '1') THEN
+		-- мужчина
+		SET genderEncoded = 'M';
+	ELSEIF (gender = '2') THEN
+		-- женщина
+		SET genderEncoded = 'F';
+	ELSEIF (gender = '0') THEN
+		--неизвестный
+		SET genderEncoded = 'U';
+	END IF;
+
+	RETURN genderEncoded;
+END;
+
+CREATE FUNCTION DecodeGender (IN genderEncoded CHARACTER) RETURNS CHARACTER
+BEGIN
+	DECLARE gender CHARACTER;
+	IF (genderEncoded = 'M') THEN
+		-- мужчина
+		SET gender = '1';
+	ELSEIF (genderEncoded = 'F') THEN
+		-- женщина
+		SET gender = '2';
+	ELSEIF (genderEncoded = 'U') THEN
+		--неизвестный
+		SET gender = '0';
+	END IF;
+
+	RETURN gender;
+END;
+
+CREATE FUNCTION EncodeBoolean (IN sysBool CHARACTER) RETURNS CHARACTER
+BEGIN
+	DECLARE mdmBool CHARACTER;
+	IF (sysBool = '1') THEN
+		-- true
+		SET mdmBool = 'Y';
+	ELSEIF (sysBool = '0') THEN
+		-- false
+		SET mdmBool = 'N';
+	END IF;
+
+	RETURN mdmBool;
+END;
+
+CREATE FUNCTION DecodeBoolean (IN mdmBool CHARACTER) RETURNS CHARACTER
+BEGIN
+	DECLARE sysBool CHARACTER;
+	IF (mdmBool = 'Y') THEN
+		-- true
+		SET sysBool = '1';
+	ELSEIF (mdmBool = 'N') THEN
+		-- false
+		SET sysBool = '0';
+	END IF;
+
+	RETURN sysBool;
+END;
+
+CREATE FUNCTION EncodeELADR (IN sysELADR CHARACTER) RETURNS CHARACTER
+BEGIN
+	RETURN sysELADR;
+END;
+
+CREATE FUNCTION DecodeELADR (IN addrType CHARACTER) RETURNS CHARACTER
+BEGIN
+	RETURN addrType;
+END;
+
+CREATE PROCEDURE ConvertAgreementToMDMValues (INOUT aggrRef REFERENCE, IN systemCode CHARACTER )
+BEGIN
+	DECLARE mdmCode CHARACTER;
+	DECLARE mdmValue CHARACTER;
+	DECLARE i INTEGER;
+	DECLARE j INTEGER;
+
+	SET aggrRef.Status = ru.croc.sbrf.mdm.common.EncodeBoolean(aggrRef.Status);
+	-- записи о кредитах
+	SET i = 1;
+	SET j = CARDINALITY(aggrRef.LoanInfo[]);
+	WHILE i <= j DO
+		CALL ru.croc.sbrf.mdm.common.EncodeToMDM(systemCode, aggrRef.LoanInfo[i].BranchNum, 'BranchNum', mdmCode, mdmValue);
+		SET aggrRef.LoanInfo[i].BranchNum = mdmValue;
+
+		CALL ru.croc.sbrf.mdm.common.EncodeToMDM(systemCode, aggrRef.LoanInfo[i].ProdType, 'ProdType', mdmCode, mdmValue);
+		SET aggrRef.LoanInfo[i].ProdType = mdmValue;
+
+		SET i = i + 1;
+	END WHILE;
+	-- записи о кредитных картах
+	SET i = 1;
+	SET j = CARDINALITY(aggrRef.CardInfo[]);
+	WHILE i <= j DO
+		SET aggrRef.CardInfo[i].AdditionalCard = ru.croc.sbrf.mdm.common.EncodeBoolean(aggrRef.CardInfo[i].AdditionalCard);
+
+		CALL ru.croc.sbrf.mdm.common.EncodeToMDM(systemCode, aggrRef.CardInfo[i].BranchNum, 'BranchNum', mdmCode, mdmValue);
+		SET aggrRef.CardInfo[i].BranchNum = mdmValue;
+
+		CALL ru.croc.sbrf.mdm.common.EncodeToMDM(systemCode, aggrRef.CardInfo[i].ProdType, 'ProdType', mdmCode, mdmValue);
+		SET aggrRef.CardInfo[i].ProdType = mdmValue;
+
+		SET i = i + 1;
+	END WHILE;
+	-- записи о депозитах
+	SET i = 1;
+	SET j = CARDINALITY(aggrRef.DepInfo[]);
+	WHILE i <= j DO
+		CALL ru.croc.sbrf.mdm.common.EncodeToMDM(systemCode, aggrRef.DepInfo[i].BranchNum, 'BranchNum', mdmCode, mdmValue);
+		SET aggrRef.DepInfo[i].BranchNum = mdmValue;
+
+		CALL ru.croc.sbrf.mdm.common.EncodeToMDM(systemCode, aggrRef.DepInfo[i].ProdType, 'ProdType', mdmCode, mdmValue);
+		SET aggrRef.DepInfo[i].ProdType = mdmValue;
+
+		SET i = i + 1;
+	END WHILE;
+END;
+
+CREATE PROCEDURE ConvertAgreementFromMDMValues (INOUT aggrRef REFERENCE, IN systemCode CHARACTER)
+BEGIN
+	DECLARE mdmCode CHARACTER;
+	DECLARE mdmValue CHARACTER;
+	DECLARE i INTEGER;
+	DECLARE j INTEGER;
+
+	SET aggrRef.Status = ru.croc.sbrf.mdm.common.DecodeBoolean(aggrRef.Status);
+	-- записи о кредитах
+	SET i = 1;
+	SET j = CARDINALITY(aggrRef.LoanInfo[]);
+	WHILE i <= j DO
+		CALL ru.croc.sbrf.mdm.common.EncodeFromMDM(systemCode, aggrRef.LoanInfo[i].BranchNum, 'BranchNum', mdmCode);
+		SET aggrRef.LoanInfo[i].BranchNum = mdmValue;
+
+		CALL ru.croc.sbrf.mdm.common.EncodeFromMDM(systemCode, aggrRef.LoanInfo[i].ProdType, 'ProdType', mdmCode);
+		SET aggrRef.LoanInfo[i].ProdType = mdmValue;
+
+		SET i = i + 1;
+	END WHILE;
+	-- записи о кредитных картах
+	SET i = 1;
+	SET j = CARDINALITY(aggrRef.CardInfo[]);
+	WHILE i <= j DO
+		SET aggrRef.CardInfo[i].AdditionalCard = ru.croc.sbrf.mdm.common.DecodeBoolean(aggrRef.CardInfo[i].AdditionalCard);
+
+		CALL ru.croc.sbrf.mdm.common.EncodeFromMDM(systemCode, aggrRef.CardInfo[i].BranchNum, 'BranchNum', mdmCode);
+		SET aggrRef.CardInfo[i].BranchNum = mdmCode;
+
+		CALL ru.croc.sbrf.mdm.common.EncodeFromMDM(systemCode, aggrRef.CardInfo[i].ProdType, 'ProdType', mdmCode);
+		SET aggrRef.CardInfo[i].ProdType = mdmCode;
+
+		SET i = i + 1;
+	END WHILE;
+	-- записи о депозитах
+	SET i = 1;
+	SET j = CARDINALITY(aggrRef.DepInfo[]);
+	WHILE i <= j DO
+		CALL ru.croc.sbrf.mdm.common.EncodeFromMDM(systemCode, aggrRef.DepInfo[i].BranchNum, 'BranchNum', mdmCode);
+		SET aggrRef.DepInfo[i].BranchNum = mdmCode;
+
+		CALL ru.croc.sbrf.mdm.common.EncodeFromMDM(systemCode, aggrRef.DepInfo[i].ProdType, 'ProdType', mdmCode);
+		SET aggrRef.DepInfo[i].ProdType = mdmCode;
+
+		SET i = i + 1;
+	END WHILE;
+END;
+
+CREATE PROCEDURE ConvertTemplateToMDMValues (INOUT templRef REFERENCE, IN systemCode CHARACTER )
+BEGIN
+
+	DECLARE mdmCode CHARACTER;
+	DECLARE mdmValue CHARACTER;
+	SET templRef.XferInfo.BankAcctIdTo.SBRF = EncodeBoolean(templRef.XferInfo.BankAcctIdTo.SBRF);
+	CALL ru.croc.sbrf.mdm.common.EncodeToMDM(systemCode, templRef.XferInfo.OrgCodeTo, 'OrgCodeTo', mdmCode, mdmValue);
+	SET templRef.XferInfo.OrgCodeTo = mdmValue;
+END;
+
+CREATE PROCEDURE ConvertTemplateFromMDMValues (INOUT templRef REFERENCE, IN systemCode CHARACTER )
+BEGIN
+
+	DECLARE mdmCode CHARACTER;
+	DECLARE mdmValue CHARACTER;
+	SET templRef.XferInfo.BankAcctIdTo.SBRF = DecodeBoolean(templRef.XferInfo.BankAcctIdTo.SBRF);
+	CALL ru.croc.sbrf.mdm.common.EncodeFromMDM(systemCode, templRef.XferInfo.OrgCodeTo, 'OrgCodeTo', mdmCode);
+	SET templRef.XferInfo.OrgCodeTo = mdmCode;
+END;
+
+/**
+ * Формирование заголовков XML
+ */
+CREATE PROCEDURE CreateXmlHeader(IN OutputRoot REFERENCE, IN encoding CHARACTER, IN doCreateDomain BOOLEAN)
+BEGIN
+	IF doCreateDomain THEN
+		CREATE LASTCHILD OF OutputRoot DOMAIN('XMLNSC') NAME 'XMLNSC';
+	END IF;
+
+	CREATE FIRSTCHILD OF OutputRoot.XMLNSC TYPE XMLNSC.XmlDeclaration; 
+	SET OutputRoot.XMLNSC.(XMLNSC.XmlDeclaration)*.(XMLNSC.Attribute)Version = '1.0'; 
+	SET OutputRoot.XMLNSC.(XMLNSC.XmlDeclaration)*.(XMLNSC.Attribute)Encoding = encoding;
+END;
+
+CREATE FUNCTION GetRqUID(IN root REFERENCE)
+RETURNS CHARACTER
+BEGIN
+	DECLARE rqUid CHARACTER COALESCE(
+		root.XMLNSC.*[<].RqUID, 
+		root.XMLNSC.IFX.*[<].RqUID, 
+		root.XMLNSC.IFX.*[<].*[<].RqUID,
+		root.XMLNSC.IFX.*[<].*[<].NfUid,
+		root.XMLNSC.*[<].MsgId,
+		root.XMLNSC.*[<].*[<].MsgId);
+	RETURN rqUid;
+END;
+
+CREATE FUNCTION GetCustSPName(IN root REFERENCE)
+RETURNS CHARACTER
+BEGIN
+	DECLARE spName CHARACTER COALESCE(
+		root.XMLNSC.IFX.*[<].*[<].CustId.SPName, 
+		root.XMLNSC.IFX.*[<].*[<].CustRec.CustId.SPName,
+
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.LoanInfo.CustId.SPName,
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.DepInfo.CustId.SPName,
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.CardInfo.CustId.SPName,
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.ServiceInfo.CustId.SPName,
+
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.LoanInfo.AgreemtCustRole.CustId.SPName,
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.DepInfo.AgreemtCustRole.CustId.SPName,
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.CardInfo.AgreemtCustRole.CustId.SPName,
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.ServiceInfo.AgreemtCustRole.CustId.SPName,
+
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.*[1].CustId.SPName);
+	RETURN spName;
+END;
+
+CREATE FUNCTION GetCustPermId(IN root REFERENCE)
+RETURNS CHARACTER
+BEGIN
+	DECLARE custPermId CHARACTER COALESCE(
+		root.XMLNSC.IFX.*[<].*[<].CustId.CustPermId, 
+		root.XMLNSC.IFX.*[<].*[<].CustRec.CustId.CustPermId,
+
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.LoanInfo.CustId.CustPermId,
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.DepInfo.CustId.CustPermId,
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.CardInfo.CustId.CustPermId,
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.ServiceInfo.CustId.CustPermId,
+
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.LoanInfo.AgreemtCustRole.CustId.CustPermId,
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.DepInfo.AgreemtCustRole.CustId.CustPermId,
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.CardInfo.AgreemtCustRole.CustId.CustPermId,
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.ServiceInfo.AgreemtCustRole.CustId.CustPermId,
+
+		root.XMLNSC.IFX.*[<].*[<].AgreemtInfo.*[1].CustId.CustPermId);
+	RETURN custPermId;
+END;
+
+CREATE FUNCTION GetBranchNum(IN root REFERENCE)
+RETURNS CHARACTER
+BEGIN
+	DECLARE branchNum CHARACTER COALESCE(
+		root.XMLNSC.IFX.*[<].*[<].CustInfo.PersonInfo.BranchNum, 
+		root.XMLNSC.IFX.*[<].*[<].CustRec.CustInfo.PersonInfo.BranchNum);
+	RETURN branchNum;
+END; 
+
+CREATE FUNCTION GenerateUUID()
+RETURNS CHARACTER
+BEGIN
+	RETURN REPLACE(uuidaschar, '-', '');
+END;
+
+/**
+ *  Функция считывает описание последней искл. ситуации
+ * 		InputExcTree 		- ссылка на дерево исключений
+ */
+CREATE FUNCTION GetLastExceptionText(IN InputExcTree REFERENCE, IN includeInserts BOOLEAN) RETURNS CHARACTER
+BEGIN
+    -- Ссылка на первый элемент
+    DECLARE ptrException REFERENCE TO InputExcTree.*[1];
+    DECLARE messageText CHARACTER;
+    DECLARE nodeName CHARACTER;
+
+    -- Перемещаем указатель на последний элемент дерева исключений
+	WHILE LASTMOVE(ptrException) DO
+		--Доходим до последнего дочернего элемента
+		MOVE ptrException LASTCHILD;
+	END WHILE;
+
+	--Перемещаем указатель на узел детального описания
+	MOVE ptrException PARENT;
+	IF ptrException.Number IS NULL THEN
+		MOVE ptrException PARENT;
+	END IF;
+
+	SET messageText = ptrException.Text;
+
+	IF includeInserts = TRUE THEN
+		SET messageText = messageText || ':';
+		FOR InsertRef AS ptrException.Insert[] DO
+			SET messageText = messageText || ' ' || InsertRef.Text;
+		END FOR;
+	END IF;
+
+	RETURN messageText;
+END;
