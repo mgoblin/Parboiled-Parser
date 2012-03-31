@@ -1,0 +1,96 @@
+BROKER SCHEMA ru.sbrf.ca.oppo.common.settings
+DECLARE ns NAMESPACE 'http://sbrf.ru/ca/oppo/common/settings';
+
+DECLARE SettingsSubTableCacheName EXTERNAL CHARACTER 'Module1';
+
+DECLARE MaxNCfgRqAttempt EXTERNAL INTEGER 1;
+
+DECLARE Timeout EXTERNAL INTEGER 1000;
+
+CREATE COMPUTE MODULE SettingsCacheSubflow_PrepareSettingsRequest
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		-- ���� ������� ���������� ����������� ��������, ������� � ��������� ������ �������������
+		IF Environment.UserProperties.nCfgRqAttempt > MaxNCfgRqAttempt THEN
+			PROPAGATE TO TERMINAL 'out1';
+			RETURN FALSE;
+		END IF;
+		
+		-- ���� ������� �������� ������� - �������
+		IF isSettingsTableFull(SettingsSubTableCacheName) THEN
+			PROPAGATE TO TERMINAL 'out1';
+			RETURN FALSE;
+		END IF;
+
+		-- ����������� ������� ������� ���������� ������� �������������
+		SET Environment.UserProperties.nCfgRqAttempt = Environment.UserProperties.nCfgRqAttempt + 1;
+		
+		-- ������������� ��� ������, �������� ���������� ���������
+		SET OutputRoot.XMLNSC.ns:SettingsRq.ModuleName = SettingsSubTableCacheName;
+		RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE SettingsCacheSubflow_IsSettingsCache
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL CopyEntireMessage();
+		-- ���� ���������� �������� �� ��������������
+		IF NOT(isSettingsTableFull(SettingsSubTableCacheName)) THEN
+			-- ���������� ������� ������� ���������� ������� ��������
+			SET Environment.UserProperties.nCfgRqAttempt = 1;
+			-- ���������� ������ ��������
+			PROPAGATE TO TERMINAL 'out1' DELETE NONE;
+			
+			WHILE (Environment.UserProperties.nCfgRqAttempt <= MaxNCfgRqAttempt) AND NOT(isSettingsTableFull(SettingsSubTableCacheName)) DO
+				-- ����������� ������� ������� ���������� ������� �������������
+				SET Environment.UserProperties.nCfgRqAttempt = Environment.UserProperties.nCfgRqAttempt + 1;
+				-- ��������� ��������
+				CALL ru.sbrf.ca.oppo.common.java.esql.wait(Timeout);
+			END WHILE;
+			
+			-- ���� ��������� � ������������ ����������� �������, �� ��������� ������������� ������� ��������
+			-- TODO: �������� ���������� ��� ��������
+			IF isSettingsTableFull(SettingsSubTableCacheName) THEN	
+				PROPAGATE TO TERMINAL 'out';		
+			ELSE
+				SET OutputRoot.MQRFH2 = NULL;
+				SET OutputRoot.MQMD.Format = MQFMT_STRING;
+				
+				SET Environment.Variables.Status.StatusCode = '-101';
+				SET Environment.Variables.Status.StatusDesc = '������� �������� �� ����������������, ��������� � ����������� �� ���� �������� � ��������� �����';
+
+				-- ��������� ������������ ���, ������� �������� �� ����������������
+				-- ���� ������ ��������� �� ������
+				THROW USER EXCEPTION VALUES (Environment.Variables.Status.StatusDesc);
+			END IF;
+		ELSE
+			PROPAGATE TO TERMINAL 'out';
+		END IF;
+		
+		RETURN FALSE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE SettingsCacheSubflow_Stub
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		-- ���������� ���� ������� ���������� ������� �������������
+		SET Environment.UserProperties.nCfgRqAttempt = NULL;
+		RETURN TRUE;
+	END;
+END MODULE;

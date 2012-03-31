@@ -116,5 +116,17 @@ class ESQLParserSpec extends SpecificationWithJUnit {
       result.resultValue(8).isInstanceOf[FunctionNode] must_== true
 
     }
+
+    "parse samples/SettingsCacheSubflow.esql" in {
+      val input = Source.fromURL(getClass.getResource("/samples/SettingsCacheSubflow.esql")).getLines().mkString("\n")
+      val result = ReportingParseRunner(parser.ESQLFile).run(input)
+
+      result.hasErrors must_== false
+      result.resultValue.length must_== 8
+      result.resultValue(0).isInstanceOf[SchemaNode] must_== true
+      result.resultValue(1).isInstanceOf[LineStatementNode] must_== true
+      result.resultValue(6).isInstanceOf[ModuleNode] must_== true
+
+    }
   }
 }
