@@ -1,12 +1,11 @@
 CREATE COMPUTE MODULE Routing_using_memory_cache_Compute
-CREATE COMPUTE MODULE Routing_using_memory_cache_Compute
 	CREATE FUNCTION Main() RETURNS BOOLEAN
 	BEGIN
 
 		-- CALL CopyMessageHeaders();
 		-- CALL CopyEntireMessage();
 
-		SET OutputLocalEnvironment = InputLocalEnvironment;
+    	SET OutputLocalEnvironment = InputLocalEnvironment;
 
 		-- Section 1
 		DECLARE Variable1 CHAR 'SAMPLE_QUEUES'; -- Hard coded value
@@ -19,7 +18,7 @@ CREATE COMPUTE MODULE Routing_using_memory_cache_Compute
 			SET Variable2 = refToInvoice."Initial"[1] ||refToInvoice."Initial"[2]; -- append the two initials together
 			SET Variable3 = refToInvoice."Surname";
 		ELSE
-        	-- Section 3
+			-- Section 3
 			SET Variable2 = 'default';
 		    SET Variable3 = 'default';
 		END IF;

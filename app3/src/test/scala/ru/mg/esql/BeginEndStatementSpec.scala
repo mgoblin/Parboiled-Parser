@@ -1,8 +1,9 @@
 package ru.mg.esql
 
 import org.specs.SpecificationWithJUnit
-import org.parboiled.scala.parserunners.ReportingParseRunner
 import statements.StatementParser
+import io.Source
+import org.parboiled.scala.parserunners.ReportingParseRunner
 
 
 class BeginEndStatementSpec extends SpecificationWithJUnit {
@@ -12,7 +13,7 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
   "Compound statement parser" should {
     "parse begin end statement" in {
 
-      val input = "BEGIN  END ;"
+      val input = "BEGIN  \nEND ;"
       val run = ReportingParseRunner(parser.BeginEndStatement).run(input)
       val result = run.resultValue
 
@@ -23,12 +24,12 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
 
     "parse begin end statement with first line comment" in {
 
-      val input = "BEGIN -- start begin END;"
+      val input = "BEGIN -- start begin\n END;"
       val run = ReportingParseRunner(parser.BeginEndStatement).run(input)
       val result = run.resultValue
 
       result mustNotBe null
-      result.text must_== " -- start begin "
+      result.text must_== " -- start begin"
       result.startLine must_== 1
     }
 
@@ -41,7 +42,7 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
       val result = run.resultValue
 
       result mustNotBe null
-      result.text must_== " -- start begin\n        "
+      result.text must_== " -- start begin"
       result.startLine must_== 1
     }
 
@@ -55,8 +56,18 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
       val result = run.resultValue
 
       result mustNotBe null
-      result.text must_== " -- start begin\n          call;\n        "
+      result.text must_== " -- start begin\n          call;"
       result.startLine must_== 1
+    }
+
+    "parse begin.esql" in {
+      val input = Source.fromURL(getClass.getResource("/begin.esql")).getLines().mkString("\n")
+      val out = "\n  -- beginning of atomic block. Processing is single threaded until the END; is reached"
+
+      val run = ReportingParseRunner(parser.BeginEndStatement).run(input)
+      val result = run.resultValue
+      result mustNotBe null
+      result.text must_== out
     }
   }
 }

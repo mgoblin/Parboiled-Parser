@@ -9,9 +9,11 @@ trait StatementParser extends ReservedWordsParser {
 
   def BeginEndStatement: Rule1[BeginEndNode] = rule {
     BEGIN ~
-      zeroOrMore(!(END ~ StatementDelimiter) ~ ANY) ~> withContext{ beginEndNode } ~
-    END ~ StatementDelimiter
+      zeroOrMore(!(End) ~ ANY) ~> withContext{ beginEndNode } ~
+    End
   }
+
+  def End = NewLine ~ zeroOrMore(anyOf(" \t"))  ~ END ~ StatementDelimiter
 
   def LineStatement: Rule1[LineStatementNode] = rule {
     zeroOrMore(!(StatementDelimiter) ~ ANY) ~> withContext(lineStatementNode) ~ StatementDelimiter
@@ -20,7 +22,7 @@ trait StatementParser extends ReservedWordsParser {
   def Comment = rule { LineComment | BlockComment }
 
   def LineComment = rule {
-    "--" ~ zeroOrMore(!(NewLine) ~ ANY) ~> withContext(commentNode) ~ NewLine
+    "--" ~ zeroOrMore(!(NewLine) ~ ANY) ~> withContext(commentNode) ~ optional(NewLine)
   }
 
   def BlockComment = rule {

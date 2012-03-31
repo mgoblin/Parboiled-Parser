@@ -1,0 +1,3 @@
+BEGIN
+  -- beginning of atomic block. Processing is single threaded until the END; is reached
+  END;

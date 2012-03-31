@@ -34,7 +34,7 @@ trait FunctionParser extends StatementParser {
   
   def FunctionBody: Rule1[List[AstNode]] = rule {
     oneOrMore((BeginEndStatement | Comment) ~ WS) |
-    ignoreCase ("EXTERNAL") ~ ignoreCase ("NAME") ~ Identifier ~> withContext { externalNode }
+      EXTERNAL ~ NAME ~ Identifier ~> withContext { externalNode }
   }
 
   def FunctionName = rule { Identifier ~> { _.toString } }

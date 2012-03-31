@@ -2,9 +2,9 @@ package ru.mg.esql
 
 import ast.AstNode
 import org.specs.SpecificationWithJUnit
-import org.parboiled.scala.parserunners.ReportingParseRunner
 import org.parboiled.scala.ParsingResult
 import statements.StatementParser
+import org.parboiled.scala.parserunners.ReportingParseRunner
 
 
 class StatementParserSpec extends SpecificationWithJUnit {
@@ -38,6 +38,16 @@ class StatementParserSpec extends SpecificationWithJUnit {
 
       val value = result.resultValue
       value.text must_== ""
+    }
+
+    "parse line comments with code elements" in {
+
+      val input = "-- This is a comment END;\n"
+      val result = ReportingParseRunner(parser.LineComment).run(input)
+
+      result.hasErrors must_== false
+      val value = result.resultValue
+      value.text must_== "This is a comment END;"
     }
 
     "Parse line statement" in  {
