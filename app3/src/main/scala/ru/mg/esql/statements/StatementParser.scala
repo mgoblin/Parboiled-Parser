@@ -2,7 +2,7 @@ package ru.mg.esql.statements
 
 import org.parboiled.scala._
 import ru.mg.esql.ast.AstNode._
-import ru.mg.esql.ast.{BeginEndNode, LineStatementNode}
+import ru.mg.esql.ast.BeginEndNode
 
 
 trait StatementParser extends ReservedWordsParser {
@@ -15,10 +15,6 @@ trait StatementParser extends ReservedWordsParser {
 
   def End = NewLine ~ zeroOrMore(anyOf(" \t"))  ~ END ~ StatementDelimiter
 
-  def LineStatement: Rule1[LineStatementNode] = rule {
-    zeroOrMore(!(StatementDelimiter) ~ ANY) ~> withContext(lineStatementNode) ~ StatementDelimiter
-  }
-
   def Comment = rule { LineComment | BlockComment }
 
   def LineComment = rule {
@@ -27,6 +23,10 @@ trait StatementParser extends ReservedWordsParser {
 
   def BlockComment = rule {
     "/*" ~ zeroOrMore(!("*/") ~ ANY) ~> withContext(blockCommentNode) ~ "*/"
+  }
+
+  def DeclareStatement = rule {
+    DECLARE ~ zeroOrMore(!StatementDelimiter ~ ANY) ~> withContext { lineStatementNode } ~ StatementDelimiter
   }
 
   def StatementDelimiter = ignoreCase(";")

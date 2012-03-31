@@ -18,7 +18,8 @@ object AstNode {
 
   def lineStatementNode = {
     (text: String, context: Context[_]) =>
-      new LineStatementNode(text.trim(), context.getPosition.line)
+      val lineNo = context.getInputBuffer.getPosition(context.getStartIndex).line
+      new LineStatementNode(text.trim(), lineNo)
   }
 
   def commentNode = {
