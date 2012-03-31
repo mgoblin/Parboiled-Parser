@@ -1,0 +1,123 @@
+BROKER SCHEMA ru.croc.sbrf.mdm.common
+
+DECLARE EVENT_EMPTY_FIELD CONSTANT CHARACTER '1';
+DECLARE EVENT_STANDARDIZATION_FAULT CONSTANT CHARACTER '2';
+DECLARE EVENT_STANDARDIZATION_SUCCESS CONSTANT CHARACTER '3';
+DECLARE EVENT_RECODE_FAULT CONSTANT CHARACTER '10';
+DECLARE EVENT_INVALID_BIRTH_DATE CONSTANT CHARACTER '11';
+
+CREATE FUNCTION writeLogRecord(
+	IN eventType CHARACTER, IN requestId CHARACTER, IN requestType CHARACTER,
+	IN requesterName CHARACTER, IN adminSysTpCd CHARACTER, IN adminClientId CHARACTER,
+	IN severity CHARACTER, IN branch CHARACTER) RETURNS CHARACTER
+BEGIN
+	DECLARE logId CHARACTER generateId('log_seq');
+
+	INSERT INTO DATABASE.LOGGING(
+		LOG_ID, EVENT_DATE, EVENT_TYPE, REQUEST_ID, REQUEST_TYPE, REQUESTER_NAME,
+		ADMIN_SYS_TP_CD, ADMIN_CLIENT_ID, 'SEVERITY', TX_LOG_ID, BRANCH)
+	VALUES (
+		logId, CURRENT_TIMESTAMP, eventType, requestId, requestType, requesterName,
+		adminSysTpCd, adminClientId, severity, null, branch);
+
+	RETURN logId;
+END;
+
+CREATE PROCEDURE writeLogFieldRecord(
+	IN logId CHARACTER, IN entityType CHARACTER,  IN fieldName CHARACTER,
+	IN fieldValueBefore CHARACTER, IN fieldValueAfter CHARACTER)
+BEGIN
+	DECLARE logFieldId CHARACTER generateId('log_field_seq');
+
+	INSERT INTO DATABASE.LOG_FIELD(
+		LOG_FIELD_ID, LOG_ID, ENTITY_TYPE, ENTITY_ID,
+		FIELD_NAME, FIELD_VALUE_BEFORE, FIELD_VALUE_AFTER)
+	VALUES (
+		logFieldId, logId, entityType, null,
+		fieldName, fieldValueBefore, fieldValueAfter);
+END;
+
+CREATE FUNCTION generateId(IN seqName CHARACTER) RETURNS CHARACTER
+BEGIN
+	DECLARE tmp ROW;
+	SET tmp.value[] = PASSTHRU('VALUES NEXT VALUE FOR ' || seqName);
+	DECLARE id CHARACTER CAST(tmp.value."1" AS CHARACTER);
+	RETURN id;
+END;
+
+CREATE PROCEDURE initContext(IN ctx REFERENCE, IN ref REFERENCE, IN sysId CHARACTER)
+BEGIN
+	DECLARE root REFERENCE TO ref;
+	WHILE LASTMOVE(root) DO
+		MOVE root PARENT;
+	END WHILE;
+
+	DECLARE Service CHARACTER FIELDNAME(root.XMLNSC.IFX.*[<]);
+	DECLARE Operation CHARACTER FIELDNAME(root.XMLNSC.IFX.{Service}.*[<]);
+
+	SET ctx.Service = Service;
+	SET ctx.Operation = Operation;
+	SET ctx.RqUID = GetRqUID(root);
+	SET ctx.BranchNum = GetBranchNum(root);
+	SET ctx.CustSPName = GetCustSPName(root);
+	SET ctx.CustPermId = GetCustPermId(root);
+	SET ctx.SPName = getSysName(sysId);
+	SET ctx.sysId = sysId;
+	SET ctx.direction = CASE WHEN ENDSWITH(Service, 'Rq') THEN 'tomdm' ELSE 'frommdm' END;
+	SET ctx.isAdd = ENDSWITH(Operation, 'AddRq');
+	SET ctx.isMod = ENDSWITH(Operation, 'ModRq');
+	SET ctx.isInq = ENDSWITH(Operation, 'InqRq');
+	SET ctx.isNf  = ENDSWITH(Operation, 'Nf');
+END;
+
+CREATE PROCEDURE putInContext(IN ctx REFERENCE, IN eventType CHARACTER, IN entityRef REFERENCE,
+	IN fieldName CHARACTER, IN oldValue CHARACTER, IN newValue CHARACTER, IN halt BOOLEAN)
+BEGIN
+	DECLARE ref REFERENCE TO ctx;
+	CREATE LASTCHILD OF ctx.events.{eventType} AS ref NAME 'event';
+	SET ref.oldValue = oldValue;
+	SET ref.newValue = newValue;
+	SET ref.halt = halt;
+	SET ref.fieldName = fieldName;
+	SET ref.entityName = FIELDNAME(entityRef);
+
+	DECLARE I INTEGER 0;
+	WHILE LASTMOVE(entityRef) DO
+		MOVE entityRef PREVIOUSSIBLING REPEAT TYPE NAME;
+		SET I = I + 1;
+	END WHILE;
+	SET ref.index = I;
+END;
+
+CREATE PROCEDURE logEvents(IN ctx REFERENCE, IN ref REFERENCE)
+BEGIN
+	DECLARE Severity CHARACTER 1;
+	DECLARE exceptionMessage CHARACTER '';
+
+	FOR eventType AS ctx.events.*[] DO
+--		DECLARE logId CHARACTER;
+--		SET logId = writeLogRecord(FIELDNAME(eventType), ctx.RqUID, ctx.Operation, ctx.SPName,
+--			CASE WHEN ctx.CustSPName IS NULL THEN NULL ELSE getSysId(ctx.CustSPName) END,
+--			ctx.CustPermId, Severity, ctx.BranchNum);
+
+		FOR event AS eventType.event[] DO
+			DECLARE entityName CHARACTER event.entityName;
+			IF event.index > 1 THEN
+				SET entityName = entityName || CAST(event.index AS CHARACTER FORMAT ' (#)');
+			END IF;
+
+--			CALL writeLogFieldRecord(logId, entityName, event.fieldName, event.oldValue, event.newValue);
+
+			IF event.halt THEN
+				SET exceptionMessage = 'Could not process field ' || COALESCE(event.fieldName, ''); 
+				/*|| ': sysId=' || COALESCE(ctx.sysId, '') || ', value=''' 
+				|| COALESCE(event.oldValue, '') || '''. ' || exceptionMessage;
+				*/
+			END IF;
+		END FOR;
+	END FOR;
+
+--	IF LENGTH(exceptionMessage) > 0 AND ctx.direction = 'tomdm' THEN
+--		THROW USER EXCEPTION VALUES(exceptionMessage);
+--	END IF;
+END;

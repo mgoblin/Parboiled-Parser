@@ -81,6 +81,16 @@ class ESQLParserSpec extends SpecificationWithJUnit {
 
     }
 
+    "parse samples/Logging.esql" in {
+      val input = Source.fromURL(getClass.getResource("/samples/Logging.esql")).getLines().mkString("\n")
+      val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
+      result.hasErrors must_== false
+      result.resultValue.length must_== 12
+      result.resultValue(0).isInstanceOf[SchemaNode] must_== true
+      result.resultValue(1).isInstanceOf[LineStatementNode] must_== true
+      result.resultValue(6).isInstanceOf[FunctionNode] must_== true
+
+    }
   }
 }

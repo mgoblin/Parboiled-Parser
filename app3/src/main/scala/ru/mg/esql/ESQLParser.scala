@@ -35,6 +35,6 @@ class ESQLParser extends ModuleParser {
   }
 
   def Statement: Rule1[AstNode] = rule {
-    (ModuleStatement| FunctionStatement | Comment | DeclareStatement) ~ WS
+    (FunctionStatement | DeclareStatement | ModuleStatement | Comment) ~ WS
   }
 }
