@@ -1,0 +1,80 @@
+BROKER SCHEMA ru.sbrf.ca.oppo.common.recordation
+DECLARE ns NAMESPACE 'http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event';
+
+
+CREATE COMPUTE MODULE TechRecordation_CallWriteEvent
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		-- CALL CopyMessageHeaders();
+		-- CALL CopyEntireMessage();
+		
+		--Параметры сообщения
+		DECLARE inEncoding INT;
+		DECLARE inCCSID INT; 
+
+		IF NOT EXISTS(InputRoot.MQMD[]) THEN
+			SET inEncoding = InputRoot.Properties.Encoding;
+			SET inCCSID = InputRoot.Properties.CodedCharSetId;
+		ELSE
+			SET inEncoding = InputRoot.MQMD.Encoding;
+			SET inCCSID = InputRoot.MQMD.CodedCharSetId;
+		END IF;
+		
+		IF inEncoding IS NULL THEN
+			SET inEncoding = 546;
+		END IF;
+		
+		IF inCCSID IS NULL THEN
+			SET inCCSID = 1208;
+		END IF;
+		declare asd character REPLACE(CAST(InputRoot.XMLNSC.ns:event.ns:eventPointData.ns:eventData.ns:eventSequence.ns:creationTime AS CHARACTER FORMAT 'I'), 'Z', '+00:00');
+		
+		CALL WRITE_TECHEVENT(
+			-- eventName
+			InputRoot.XMLNSC.ns:event.ns:eventPointData.ns:eventData.ns:eventIdentity.ns:eventName,
+			-- creationTime
+			REPLACE(CAST(InputRoot.XMLNSC.ns:event.ns:eventPointData.ns:eventData.ns:eventSequence.ns:creationTime AS CHARACTER FORMAT 'I'), 'Z', '+00:00'),
+			-- localTransactionId
+			InputRoot.XMLNSC.ns:event.ns:eventPointData.ns:eventData.ns:eventCorrelation.ns:localTransactionId,
+			-- parentTransactionId
+			InputRoot.XMLNSC.ns:event.ns:eventPointData.ns:eventData.ns:eventCorrelation.ns:parentTransactionId,
+			-- globalTransactionId
+			InputRoot.XMLNSC.ns:event.ns:eventPointData.ns:eventData.ns:eventCorrelation.ns:globalTransactionId,
+			-- brokerName
+			InputRoot.XMLNSC.ns:event.ns:eventPointData.ns:messageFlowData.ns:broker.ns:name,
+			-- executionGroupName
+			InputRoot.XMLNSC.ns:event.ns:eventPointData.ns:messageFlowData.ns:executionGroup.ns:name,
+			-- flowName
+			InputRoot.XMLNSC.ns:event.ns:eventPointData.ns:messageFlowData.ns:messageFlow.ns:name,
+			-- nodeName
+			InputRoot.XMLNSC.ns:event.ns:eventPointData.ns:messageFlowData.ns:node.ns:nodeLabel,
+			-- terminalName
+			InputRoot.XMLNSC.ns:event.ns:eventPointData.ns:messageFlowData.ns:node.ns:terminal,
+			-- eventMessage
+			RefToStr(InputBody, inEncoding, inCCSID)
+		);
+		
+		RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE FUNCTION RefToStr(IN ref REFERENCE, IN enc INT, IN ccsid INT) RETURNS CHARACTER BEGIN
+	DECLARE bitStream BLOB ASBITSTREAM(ref, enc, ccsid);
+	RETURN CAST(bitStream AS CHAR CCSID ccsid);
+END;
+
+CREATE PROCEDURE WRITE_TECHEVENT(
+		IN EVENTNAME CHARACTER,
+		IN CREATIONTIME CHARACTER,
+		IN LOCALTRANSACTIONID CHARACTER,
+		IN PARENTTRANSACTIONID CHARACTER,
+		IN GLOBALTRANSACTIONID CHARACTER,
+		IN BROKERNAME CHARACTER,
+		IN EXECUTIONGROUPNAME CHARACTER,
+		IN FLOWNAME CHARACTER,
+		IN NODENAME CHARACTER,
+		IN TERMINALNAME CHARACTER,
+		IN EVENTMESSAGE CHARACTER
+	)
+	LANGUAGE DATABASE
+	EXTERNAL NAME "esbre.RECORDATIONPACKAGE.WRITE_TECHEVENT";

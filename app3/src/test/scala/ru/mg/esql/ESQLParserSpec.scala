@@ -143,13 +143,25 @@ class ESQLParserSpec extends SpecificationWithJUnit {
 
     "parse samples/SettingsUtil.esql" in {
       val input = Source.fromURL(getClass.getResource("/samples/SettingsUtil.esql")).getLines().mkString("\n")
-      val result = TracingParseRunner(parser.ESQLFile).run(input)
+      val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
       result.resultValue.length must_== 5
       result.resultValue(0).isInstanceOf[SchemaNode] must_== true
       result.resultValue(1).isInstanceOf[BlockCommentNode] must_== true
       result.resultValue(2).isInstanceOf[FunctionNode] must_== true
+
+    }
+
+    "parse samples/TechRecordation.esql" in {
+      val input = Source.fromURL(getClass.getResource("/samples/TechRecordation.esql")).getLines().mkString("\n")
+      val result = ReportingParseRunner(parser.ESQLFile).run(input)
+
+      result.hasErrors must_== false
+      result.resultValue.length must_== 5
+      result.resultValue(0).isInstanceOf[SchemaNode] must_== true
+      result.resultValue(1).isInstanceOf[LineStatementNode] must_== true
+      result.resultValue(2).isInstanceOf[ModuleNode] must_== true
 
     }
   }
