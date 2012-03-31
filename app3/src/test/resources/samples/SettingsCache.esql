@@ -1,0 +1,342 @@
+BROKER SCHEMA ru.sbrf.ca.oppo.common.settings
+
+-- Создаем в памяти настройки (ТН)
+DECLARE SettingsTableCache SHARED ROW;
+
+------------------------------------------------------------
+--
+-- Функция для проверки наполненности ТН (при старте брокера или при перезапуске флоу она не инициализирована)
+--
+------------------------------------------------------------
+CREATE FUNCTION isSettingsTableFull(IN moduleName CHARACTER) RETURNS BOOLEAN
+BEGIN
+	IF SettingsTableCache.{moduleName}.valid THEN
+		RETURN TRUE;
+	ELSE
+		RETURN FALSE; 	
+	END	IF;
+END;
+
+------------------------------------------------------------
+--
+-- Функция для получения значения параметры из ТН
+--
+------------------------------------------------------------
+CREATE FUNCTION getSettingsValue(IN moduleName CHARACTER, IN xPath CHARACTER) RETURNS CHARACTER
+BEGIN
+	-- Проверка наполнености ТН
+	IF (NOT isSettingsTableFull(moduleName)) THEN
+		-- В ТН не закэшированы настройки для модуля
+		
+	ELSE
+		-- В ТН закэшированы настройки для модуля		
+		RETURN SettingsTableCache.{moduleName}.{xPath};
+	END IF;
+END;
+
+------------------------------------------------------------
+--
+-- Процедура обновления настроек из БД
+--
+------------------------------------------------------------
+CREATE PROCEDURE UpdateSettingsTable(IN moduleName CHARACTER)
+BEGIN
+	DECLARE settingsChar CHARACTER;
+	-- Вызов хранимой процедуры получения настроек из БД
+	CALL getSettingsTreeFromDB(moduleName, settingsChar);
+	-- Проверяем существует ли данная настройка в БД
+	IF settingsChar IS NULL THEN
+		-- TODO: Код ошибки
+		-- Настроек для модуля нет, ветка настроек не может быть инициализирована
+		-- Надо выдать сообщение об ошибке
+		THROW USER EXCEPTION VALUES (ROW('-201' as StatusCode, 
+				'В базе данных настройка для модуля ' || moduleName || ' не представлена' as StatusDesc));
+		RETURN FALSE;
+	END IF;
+	-- Разбор полученной настройки в дерево
+	DECLARE settingsTree ROW;
+	CREATE LASTCHILD OF settingsTree PARSE(CAST(settingsChar AS BLOB)
+											ENCODING 0 
+											CCSID 1208);
+	-- Заполнение таблицы настроек
+	CALL InitSettingsTableCache(settingsTree);
+END;
+
+------------------------------------------------------------
+--
+-- Функция заполнения таблицы настроек из конфигурационного сообщения
+-- Полученные настройки разбираются в дерево, так чтобы ключ становился узлом ветки
+--
+------------------------------------------------------------
+CREATE PROCEDURE InitSettingsTableCache(IN inxml REFERENCE)
+BEGIN
+	DECLARE rootTag CHARACTER;
+	SET rootTag = FIELDNAME(inxml.*:*[<]);
+	DECLARE moduleName CHARACTER;
+	-- TODO: Имя модуля
+	SET moduleName = rootTag;
+	
+	
+	-- TODO: Перестройка дерева для более быстрой навигации
+	-- Промежуточное дерево настроек
+	DECLARE settingsTree ROW;
+	SET settingsTree = inxml;
+	DECLARE settingsTreeRef REFERENCE TO settingsTree;
+	-- Признак наличия ошибки в таблице настроек	
+	-- DECLARE isError BOOLEAN FALSE;
+	-- Удаление пространства имен
+	CALL ChangeNamespaceInOutputRoot (settingsTreeRef, '', '');
+	
+	CALL RebuildTreeNR(settingsTreeRef);
+	-- CALL RebuildTree(inxml.{rootTag}, settingsTreeRef);
+	
+	-- Простое заполнение таблицы настроек
+	SET SettingsTableCache.{moduleName} = settingsTree;
+	SET SettingsTableCache.{moduleName}.valid = TRUE;
+	SET SettingsTableCache.{moduleName}.updateDt = CURRENT_TIMESTAMP;	 
+	
+	-- TODO: для случае перестройки дерева настроек добавить проверку 'AND NOT(isError)'
+	/*
+	IF EXISTS(settingsTree.*[]) THEN
+		SET SettingsTableCache.{moduleName} = inxml;
+		SET SettingsTableCache.{moduleName}.valid = TRUE;
+		SET SettingsTableCache.{moduleName}.updateDt = CURRENT_TIMESTAMP;	 
+	ELSE
+		-- Если таблица уже существует, то ее не сбрасываем,
+		-- Надо просто выдать сообщение об ошибке
+		IF SettingsTableCache.valid = TRUE THEN
+			THROW USER EXCEPTION VALUES ('-101','Таблица настроек не обновлена, сообщение с конфигурацией имеет неправильный формат');
+		-- Сообщения конфигурации нет, траблица не инициализирована
+		-- Надо выдать сообщение об ошибке		
+		ELSE
+			SET SettingsTableCache.valid = FALSE;
+			THROW USER EXCEPTION VALUES ('-101','Таблица настроек не инициализирована, сообщение с конфигурацией имеет неправильный формат');
+		END IF;
+	END IF;
+	*/
+END;
+
+------------------------------------------------------------
+--
+-- Процедура перестройки дерева по ключу 'PartCode'
+--
+------------------------------------------------------------
+CREATE PROCEDURE RebuildTree(INOUT inxml REFERENCE)
+BEGIN
+	DECLARE partCode CHARACTER FIELDVALUE(inxml.(XMLNSC.Field)PartCode);
+	SET partCode = NVL(partCode);
+	IF (partCode <> 'NULL') THEN
+		-- Если элемент имеет ключ - перестраиваем его
+		DECLARE keyValue CHARACTER FIELDVALUE(inxml.PartCode);
+		-- Удаляем элемент со значением ключа
+		SET inxml.PartCode = NULL;
+		-- Создается последний элемент с именем - значение ключа
+		CREATE LASTCHILD OF inxml NAME keyValue;
+		-- Все оригинальные дочерние элементы перемещаются в ключ
+		DECLARE I INTEGER;
+		SET I = CARDINALITY(inxml.*[]);
+		WHILE I > 1 DO
+			DECLARE ref REFERENCE TO inxml.*[I];
+			DETACH ref;
+			ATTACH ref TO inxml.{keyValue} as LASTCHILD;
+			SET I = I - 1;
+		END WHILE;
+	END IF;
+	-- Перестраиваем все дочерние поддеревья
+	DECLARE I INTEGER;
+	DECLARE J INTEGER 1;
+	SET I = CARDINALITY(inxml.*[]);
+	WHILE J <= I DO
+		CALL RebuildTree(inxml.*[J]);
+		SET J = J + 1;
+	END WHILE;
+	MOVE inxml PARENT;
+END;
+
+------------------------------------------------------------
+--
+-- Процедура перестройки дерева по ключу 'PartCode'
+--
+------------------------------------------------------------
+CREATE PROCEDURE RebuildTreeNR(INOUT rootNode REFERENCE)
+BEGIN
+	--		
+	-- CHECKSIBLING - флаг, когда установлен в TRUE, гарантирует что цикл WHILE совершает
+	-- неограниченные MOVE ... NEXTSIBLING (предпочтительнее чем MOVE ... FIRSTCHILD)
+	-- Это необходимо, когда соврешает подъем на уровень в дереве, иначе мы перейдем к тому же узлу, где были.
+	--
+	DECLARE CHECKSIBLING BOOLEAN FALSE;
+	--
+	-- DEPTH определяет условие выхода из цикла.  
+	-- MOVE FIRSTCHILD увеличивает DEPTH на 1
+	-- MOVE PARENT уменьшает DEPTH на 1
+	-- MOVE NEXTSIBLING не изменяет DEPTH
+	-- Начальное значение 1, оканчание при DEPTH = 0
+	--
+	DECLARE DEPTH INTEGER 1;
+	--
+	-- Обход дерева сверху вниз, слева направо.
+	--
+	WHILE DEPTH <> 0 DO 
+		-- Узел имеет ключ
+		IF NOT(rootNode.(XMLNSC.Field)PartCode IS NULL) THEN
+			DECLARE C INTEGER;
+			SET C = CARDINALITY(rootNode.*[]);
+			WHILE 1 <= C DO
+				DECLARE ref REFERENCE TO rootNode.*[C];
+				IF FIELDNAME(ref) <> 'PartCode' THEN
+					DETACH ref;
+					ATTACH ref TO rootNode.(XMLNSC.Field)PartCode as LastChild;
+				END IF;
+				SET C = C - 1;
+			END WHILE;
+		END IF;
+		-- Переход к следующему элементу
+		IF CHECKSIBLING = FALSE THEN 
+			MOVE rootNode FirstChild;
+		 	IF LASTMOVE(rootNode) = TRUE THEN
+				SET DEPTH = DEPTH + 1;
+		 	ELSE
+		 		MOVE rootNode NEXTSIBLING;
+			 	IF LASTMOVE(rootNode) = TRUE THEN
+					SET CHECKSIBLING = FALSE;
+			 	ELSE
+					SET DEPTH = DEPTH - 1;
+					Move rootNode PARENT;		 		
+					SET CHECKSIBLING = TRUE;
+				END IF;
+		 	END IF;	
+		ELSE
+			MOVE rootNode NEXTSIBLING;
+		 	IF LASTMOVE(rootNode) = TRUE THEN
+				SET CHECKSIBLING = FALSE;
+		 	ELSE
+				SET DEPTH = DEPTH - 1;
+				Move rootNode PARENT;		 		
+				SET CHECKSIBLING = TRUE;
+			END IF;
+		END IF;
+	END WHILE;
+END;
+
+------------------------------------------------------------
+--
+-- Проверка значения для переданного параметра на существование и на пустое значение  
+-- Если пусто или не существует, то возвращаем NULL
+--
+------------------------------------------------------------
+CREATE FUNCTION NVL(IN val CHARACTER) RETURNS CHARACTER
+BEGIN
+	IF val is NULL or TRIM(val) = '' THEN 
+		RETURN 'NULL';
+	ELSE 
+		RETURN val; 
+	END IF;
+END;	
+
+------------------------------------------------------------
+--
+-- Функция изменяющая пространства имен в дереве  
+--
+------------------------------------------------------------
+CREATE FUNCTION ChangeNamespaceInOutputRoot(In rootNode REFERENCE, In oldNamespace CHARACTER, In newNamespace CHARACTER)
+BEGIN
+	--
+	-- Необходимо для удаления расположения схемы(schemaLocation) и определения пространства имен(NamespaceDecl)
+	--
+	IF newNamespace = '' THEN
+		SET rootNode.(XMLNSC.Element)*[1].*:schemaLocation = NULL;
+		DECLARE I1 INTEGER CARDINALITY(rootNode.(XMLNSC.Element)*[1].(XMLNSC.NamespaceDecl)*[]);
+		DECLARE I2 INTEGER 1;
+		WHILE I2 <= I1 DO
+			SET rootNode.(XMLNSC.Element)*[1].(XMLNSC.NamespaceDecl)*[1] = NULL;
+			SET I2 = I2 + 1;
+		END WHILE;	 
+	ELSE
+	--
+	-- Необходимо для модификации расположения схемы(schemaLocation) и определения пространства имен(NamespaceDecl)
+	--
+	-- Target schemalocations может быть определено без заголовков MQRFH2 источника сообщений,
+	-- <usr> раздела, тега <TargetSchemaLocation>
+	--
+		IF rootNode.(XMLNSC.Element)*[1].*:schemaLocation IS NOT NULL THEN
+			SET rootNode.(XMLNSC.Element)*[1].*:schemaLocation = newNamespace;
+		END IF;	
+	END IF;	
+	--		
+	-- CHECKSIBLING - флаг, когда установлен в TRUE, гарантирует что цикл WHILE совершает
+	-- неограниченные MOVE ... NEXTSIBLING (предпочтительнее чем MOVE ... FIRSTCHILD)
+	-- Это необходимо, когда соврешает подъем на уровень в дереве, иначе мы перейдем к тому же узлу, где были.
+	--
+	DECLARE CHECKSIBLING BOOLEAN FALSE;
+	--
+	-- DEPTH определяет условие выхода из цикла.  
+	-- MOVE FIRSTCHILD увеличивает DEPTH на 1
+	-- MOVE PARENT уменьшает DEPTH на 1
+	-- MOVE NEXTSIBLING не изменяет DEPTH
+	-- Начальное значение 1, оканчание при DEPTH = 0
+	--
+	DECLARE DEPTH INTEGER 1;
+	--
+	-- Обход дерева сверху вниз, слева направо.
+	--
+	WHILE DEPTH <> 0 DO 
+		IF CHECKSIBLING = FALSE THEN 
+			MOVE rootNode FirstChild;
+		 	IF LASTMOVE(rootNode) = TRUE THEN
+				SET DEPTH = DEPTH + 1;
+				CALL ChangeNamespace(rootNode, oldNamespace, newNamespace);
+		 	ELSE
+		 		MOVE rootNode NEXTSIBLING;
+			 	IF LASTMOVE(rootNode) = TRUE THEN
+					CALL ChangeNamespace(rootNode, oldNamespace, newNamespace);
+					SET CHECKSIBLING = FALSE;
+			 	ELSE
+					SET DEPTH = DEPTH - 1;
+					Move rootNode PARENT;		 		
+					SET CHECKSIBLING = TRUE;
+				END IF;
+		 	END IF;	
+		ELSE
+			MOVE rootNode NEXTSIBLING;
+		 	IF LASTMOVE(rootNode) = TRUE THEN
+				CALL ChangeNamespace(rootNode, oldNamespace, newNamespace);
+				SET CHECKSIBLING = FALSE;
+		 	ELSE
+				SET DEPTH = DEPTH - 1;
+				Move rootNode PARENT;		 		
+				SET CHECKSIBLING = TRUE;
+			END IF;
+		END IF;
+	END WHILE;
+END;
+
+CREATE FUNCTION ChangeNamespace(IN rootNode REFERENCE, In oldNamespace CHARACTER, In newNamespace CHARACTER)
+BEGIN
+	--
+	-- Проверка элементов и атрибутов с пространством имен
+	--
+    IF (FIELDTYPE(rootNode) = Name) OR (FIELDTYPE(rootNode) = NameValue) THEN
+		IF (FIELDNAMESPACE(rootNode) IN (oldNamespace)) OR (oldNamespace = '') THEN 
+			--
+			-- Установка нового пространства имен
+			--
+			SET rootNode NAMESPACE = newNamespace;
+			--
+			-- Избавление от всех определений пространств имен
+			--
+			SET rootNode.(XMLNSC.NamespaceDecl)* = NULL;
+		END IF;
+    END IF;
+END;
+
+----------------------------------
+--
+-- Хранимая процедура для получения настройки из базы данных
+-- moduleName 		- имя модуля
+-- settingsValue 	- значение настройки
+--
+----------------------------------
+CREATE PROCEDURE getSettingsTreeFromDB (IN moduleName CHARACTER, OUT settingsValue CHARACTER)
+  LANGUAGE DATABASE
+  EXTERNAL NAME "reint.getSettingsTree";
