@@ -1,29 +1,34 @@
 package ru.mg.esql.statements
 
 import ru.mg.esql.ast.AstNode._
-import ru.mg.esql.statements.ModuleUtils._
+import org.parboiled.scala._
 
 
 trait ModuleParser extends FunctionParser {
   
-  def Module = rule {
-    (ModuleHeader ~ WS ~ ModuleBody ~ WS ~ ModuleFooter ~ WS ~ StatementDelimiter) ~~> withContext(moduleNode)
+  def ModuleStatement = rule {
+    (ModuleHeader ~ ModuleBody ~ ModuleFooter ~ StatementDelimiter) ~~> withContext(moduleNode)
   }
 
   def ModuleHeader = rule {
-    WS ~ ignoreCase("CREATE") ~ WS ~ ModuleType ~ WS ~ ignoreCase("MODULE") ~ WS ~ ModuleName ~> normalize
+    def join = { x: String => x.split(" ").map(_.trim()).filter(!_.isEmpty).mkString(" ") }
+    CREATE ~ ModuleType ~ MODULE ~ ModuleName ~ WS ~> join
   }
 
   def ModuleType = rule {
-    ignoreCase("COMPUTE") | ignoreCase("DATABASE") | ignoreCase("FILTER")
+    (ignoreCase("COMPUTE") | ignoreCase("DATABASE") | ignoreCase("FILTER")) ~ WS
   }
 
   def ModuleFooter = rule {
-    (ignoreCase("END") ~ WS ~ ignoreCase("MODULE")) ~> normalize
+    ignoreCase("END") ~ WS ~ ignoreCase("MODULE") ~ WS ~> { _ => "END MODULE" }
   }
 
   def ModuleBody = rule {
-    zeroOrMore((Comment | LineStatement) ~ WS)
+    zeroOrMore(FunctionStatement | Comment | moduleLineStatement) ~ WS
+  }
+
+  def moduleLineStatement = rule {
+    zeroOrMore(!(ModuleFooter) ~ ANY) ~> withContext(lineStatementNode) ~ StatementDelimiter
   }
 
   def ModuleName = Identifier

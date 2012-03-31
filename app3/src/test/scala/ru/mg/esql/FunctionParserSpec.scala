@@ -149,4 +149,14 @@ class FunctionParserSpec extends SpecificationWithJUnit {
     result.resultValue.statements(0).isInstanceOf[BeginEndNode] must_== true
   }
 
+  "parse function from file function3.esql" in {
+    val input = Source.fromURL(getClass.getResource("/function2.esql")).getLines().mkString("\n")
+    val result = ReportingParseRunner(parser.FunctionStatement).run(input)
+
+    result.hasErrors must_== false
+    result.resultValue.startLine must_== 1
+    result.resultValue.statements.length must_== 1
+    result.resultValue.statements(0).isInstanceOf[BeginEndNode] must_== true
+  }
+
 }

@@ -8,9 +8,9 @@ import ru.mg.esql.ast.{BeginEndNode, LineStatementNode}
 trait StatementParser extends ReservedWordsParser {
 
   def BeginEndStatement: Rule1[BeginEndNode] = rule {
-    ignoreCase("BEGIN") ~
-      zeroOrMore(!(ignoreCase("END") ~ WS ~ StatementDelimiter) ~ ANY) ~> withContext{ beginEndNode } ~
-    ignoreCase("END") ~ WS ~ StatementDelimiter
+    BEGIN ~
+      zeroOrMore(!(END ~ StatementDelimiter) ~ ANY) ~> withContext{ beginEndNode } ~
+    END ~ StatementDelimiter
   }
 
   def LineStatement: Rule1[LineStatementNode] = rule {
