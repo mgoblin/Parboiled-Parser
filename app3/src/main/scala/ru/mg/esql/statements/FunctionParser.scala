@@ -34,8 +34,8 @@ trait FunctionParser extends StatementParser {
   
   def FunctionBody: Rule1[List[AstNode]] = rule {
     oneOrMore((BeginEndStatement | Comment) ~ WS) |
-      EXTERNAL ~ NAME ~ Identifier ~> withContext { externalNode }
+      EXTERNAL ~ NAME ~ "\"" ~ oneOrMore(!"\"" ~ ANY) ~> withContext { externalNode } ~ "\"" ~ StatementDelimiter
   }
 
-  def FunctionName = rule { Identifier ~> { _.toString } }
+  def FunctionName = rule { Identifier ~> { _.toString } ~ WS }
 }

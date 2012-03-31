@@ -22,7 +22,7 @@ trait StatementParser extends ReservedWordsParser {
   }
 
   def BlockComment = rule {
-    "/*" ~ zeroOrMore(!("*/") ~ ANY) ~> withContext(blockCommentNode) ~ "*/"
+    "/*" ~ zeroOrMore(!("*/") ~ ANY) ~> withContext(blockCommentNode) ~ "*/" ~ WS
   }
 
   def DeclareStatement = rule {

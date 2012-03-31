@@ -1,0 +1,19 @@
+BROKER SCHEMA ru.sbrf.ca.oppo.common.java.esql
+
+/**
+ * 		element
+ * 		error
+ */
+
+CREATE FUNCTION isMsgCorrect (IN element REFERENCE, OUT error CHARACTER)
+RETURNS BOOLEAN
+LANGUAGE JAVA
+EXTERNAL NAME "ru.sbrf.ca.oppo.common.settings.SettingsTableHashValidator.isMsgCorrect";
+
+/**
+ *   java
+ * 		timeout		-
+ */
+CREATE PROCEDURE wait (IN timeout INTEGER)
+LANGUAGE JAVA
+EXTERNAL NAME "ru.sbrf.ca.oppo.common.util.Timer.wait";
