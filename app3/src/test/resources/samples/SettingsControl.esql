@@ -1,0 +1,55 @@
+BROKER SCHEMA ru.sbrf.ca.oppo.common.settings
+
+CREATE COMPUTE MODULE SettingsControl_DetectOperation
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		-- CALL CopyMessageHeaders();
+		CALL CopyEntireMessage();
+		
+		DECLARE OPERATION CHARACTER FIELDNAME(InputRoot.XMLNSC.*:*[<]);
+		
+		IF (OPERATION='SettingsUpdateRq') THEN
+			-- Запрос на обновление настройки из БД
+			Set OutputLocalEnvironment.Destination.RouterList.DestinationData[1].labelName = 'SettingsUpdateRq';
+		ELSEIF (OPERATION='SettingsRemoveRq') THEN
+			-- Запрос на удаление записи из ТН
+			Set OutputLocalEnvironment.Destination.RouterList.DestinationData[1].labelName = 'SettingsRemoveRq';			
+		ELSE
+			THROW USER EXCEPTION VALUES ('Unknown format XML', OPERATION);
+		END IF;
+		
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE SettingsControl_UpdateSettingsTable
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		IF (InputRoot.XMLNSC.ns:SettingsUpdateRq.SettingName IS NOT NULL) THEN
+			-- Обновляем настройку из БД
+			CALL UpdateSettingsTable(FIELDVALUE(InputRoot.XMLNSC.ns:SettingsUpdateRq.SettingName));
+		ELSE
+			THROW USER EXCEPTION VALUES ('Wrong message format', InputRoot.XMLNSC);
+		END IF;
+		RETURN TRUE;
+	END;
+END MODULE;
+
+
+CREATE COMPUTE MODULE SettingsControl_RemoveSettingsRecord
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		IF (InputRoot.XMLNSC.ns:SettingsUpdateRq.SettingName IS NOT NULL) THEN
+			-- Обновляем настройку из БД
+			CALL UpdateSettingsTable(FIELDVALUE(InputRoot.XMLNSC.ns:SettingsUpdateRq.SettingName));
+		ELSE
+			THROW USER EXCEPTION VALUES ('Wrong message format', InputRoot.XMLNSC);
+		END IF;
+		RETURN TRUE;
+	END;
+
+END MODULE;

@@ -128,5 +128,17 @@ class ESQLParserSpec extends SpecificationWithJUnit {
       result.resultValue(6).isInstanceOf[ModuleNode] must_== true
 
     }
+
+    "parse samples/SettingsControl.esql" in {
+      val input = Source.fromURL(getClass.getResource("/samples/SettingsControl.esql")).getLines().mkString("\n")
+      val result = ReportingParseRunner(parser.ESQLFile).run(input)
+
+      result.hasErrors must_== false
+      result.resultValue.length must_== 4
+      result.resultValue(0).isInstanceOf[SchemaNode] must_== true
+      result.resultValue(1).isInstanceOf[ModuleNode] must_== true
+      result.resultValue(2).isInstanceOf[ModuleNode] must_== true
+
+    }
   }
 }
