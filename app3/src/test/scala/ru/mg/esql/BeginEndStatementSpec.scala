@@ -36,8 +36,9 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
     "parse begin end statement with first and last line comment" in {
 
       val input = """BEGIN -- start begin
-        END; -- end comment
-      """
+      |END; -- end comment
+      """.stripMargin
+
       val run = ReportingParseRunner(parser.BeginEndStatement).run(input)
       val result = run.resultValue
 
@@ -49,14 +50,14 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
     "parse begin end statement with last line comment" in {
 
       val input = """BEGIN -- start begin
-          call;
-        END; -- end comment
-      """
+      |    call;
+      |END; -- end comment
+      """.stripMargin
       val run = ReportingParseRunner(parser.BeginEndStatement).run(input)
       val result = run.resultValue
 
       result mustNotBe null
-      result.text must_== "-- start begin\n          call;"
+      result.text must_== "-- start begin\n    call;"
       result.startLine must_== 1
     }
 

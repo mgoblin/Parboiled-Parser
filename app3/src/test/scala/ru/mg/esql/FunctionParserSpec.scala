@@ -115,9 +115,10 @@ class FunctionParserSpec extends SpecificationWithJUnit {
     }
 
     "parse function declaration with specified language" in {
-      val input = """CREATE PROCEDURE Main() LANGUAGE ESQL
-      BEGIN
-      END;
+      val input =
+      """CREATE PROCEDURE Main() LANGUAGE ESQL
+         BEGIN
+         END;
       """
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
