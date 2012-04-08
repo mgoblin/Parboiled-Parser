@@ -3,7 +3,6 @@ package ru.mg.esql
 import ast.AstNode
 import ru.mg.esql.ast.AstNode._
 import org.parboiled.scala._
-import statements.ModuleParser
 
 
 class ESQLParser extends ModuleParser {

@@ -2,7 +2,6 @@ package ru.mg.esql
 
 import ast.BeginEndNode
 import org.specs.SpecificationWithJUnit
-import statements.FunctionParser
 import scala.io.Source
 import org.parboiled.scala.parserunners.ReportingParseRunner
 

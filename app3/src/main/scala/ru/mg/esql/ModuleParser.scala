@@ -1,22 +1,26 @@
-package ru.mg.esql.statements
+package ru.mg.esql
 
 import ru.mg.esql.ast.AstNode._
 import org.parboiled.scala._
 
 
 trait ModuleParser extends FunctionParser {
-  
+
   def ModuleStatement = rule {
     (ModuleHeader ~ ModuleBody ~ ModuleFooter) ~~> withContext(moduleNode)
   }
 
   def ModuleHeader = rule {
-    def join = { x: String => x.split(" ").map(_.trim()).filter(!_.isEmpty).mkString(" ") }
+    def join = {
+      x: String => x.split(" ").map(_.trim()).filter(!_.isEmpty).mkString(" ")
+    }
     CREATE ~ (COMPUTE | DATABASE | FILTER) ~ MODULE ~ ModuleName ~ WS ~> join
   }
 
   def ModuleFooter = rule {
-    END ~ MODULE ~> { _ => "END MODULE" } ~ StatementDelimiter
+    END ~ MODULE ~> {
+      _ => "END MODULE"
+    } ~ StatementDelimiter
   }
 
   def ModuleBody = rule {
@@ -24,7 +28,9 @@ trait ModuleParser extends FunctionParser {
   }
 
   def moduleLineStatement = rule {
-    zeroOrMore(!(ModuleFooter | StatementDelimiter ~> { _.toString }) ~ ANY) ~> withContext(lineStatementNode) ~ StatementDelimiter
+    zeroOrMore(!(ModuleFooter | StatementDelimiter ~> {
+      _.toString
+    }) ~ ANY) ~> withContext(lineStatementNode) ~ StatementDelimiter
   }
 
   def ModuleName = Identifier

@@ -2,7 +2,6 @@ package ru.mg.esql
 
 import ast.{LineStatementNode, CommentNode, FunctionNode}
 import org.specs.SpecificationWithJUnit
-import statements.ModuleParser
 import io.Source
 import org.parboiled.scala._
 
