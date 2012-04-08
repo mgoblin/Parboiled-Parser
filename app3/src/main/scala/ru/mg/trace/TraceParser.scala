@@ -1,47 +1,26 @@
 package ru.mg.trace
 
 import org.parboiled.scala._
+import ru.mg.ast.TraceAstNode._
+import ru.mg.ast.TraceLineNode
 
 
-class TraceParser extends TimestampParser {
+trait TraceParser extends TimestampParser {
 
-//
-//  def Trace = rule { zeroOrMore(TraceLine) ~ EOI }
-//
-//  def TraceLine = rule {
-//    Timestamp ~ ThreadId ~ LineType ~ RecordType ~ Message ~ NewLine
-//  }
-//
-//
-//  def ThreadId = rule {
-//
-//  }
-//
-//  def LineType = rule {
-//
-//  }
-//
-//  def RecordType = rule {
-//
-//  }
-//
-//  def Message = rule {
-//
-//  }
-//
-//  def NewLine = optional("\r") ~ "\n"
-//
-//  // Whitespace rule
-//  def WS: Rule0 = rule {
-//    zeroOrMore(anyOf(" \t\n\r\f"))
-//  }
-//  /**
-//   * We redefine the default string-to-rule conversion to also match trailing whitespace if the string ends with
-//   * a blank, this keeps the rules free from most whitespace matching clutter
-//   */
-//  override implicit def toRule(string: String) =
-//    if (string.endsWith(" "))
-//      str(string.trim) ~ WS
-//    else
-//      str(string)
+  def Trace = rule { zeroOrMore(TraceLine) ~ EOI }
+
+  def TraceLine: Rule1[TraceLineNode] = rule {
+    Timestamp ~ WS ~ ThreadId ~ WS ~ TraceType ~ WS ~ Message ~~> { traceLineNode } ~ NewLine
+  }
+
+  def ThreadId = rule { oneOrMore("0" - "9") ~> { _.toString } }
+
+  def TraceType = rule { oneOrMore(("a" - "z") | ("A" - "Z")) ~> { _.toString } }
+
+  def Message = rule { zeroOrMore(!(NewLine) ~ ANY) ~> { _.toString } }
+
+  def NewLine = optional("\r") ~ "\n"
+
+  def WS: Rule0 = rule { zeroOrMore(anyOf(" \t")) }
+
 }

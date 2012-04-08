@@ -1,8 +1,8 @@
 package ru.mg.esql
 
 import org.parboiled.scala._
-import ru.mg.esql.ast.AstNode._
-import ru.mg.esql.ast.{AstNode, FunctionNode}
+import ru.mg.esql.ast.EsqlAstNode._
+import ru.mg.esql.ast.{EsqlAstNode, FunctionNode}
 
 
 trait FunctionParser extends StatementParser {
@@ -39,7 +39,7 @@ trait FunctionParser extends StatementParser {
     } ~ WS
   }
 
-  def FunctionBody: Rule1[List[AstNode]] = rule {
+  def FunctionBody: Rule1[List[EsqlAstNode]] = rule {
     oneOrMore((BeginEndStatement | Comment) ~ WS) |
       EXTERNAL ~ NAME ~ "\"" ~ oneOrMore(!"\"" ~ ANY) ~> withContext {
         externalNode

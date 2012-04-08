@@ -1,6 +1,6 @@
 package ru.mg.esql
 
-import ru.mg.esql.ast.AstNode._
+import ru.mg.esql.ast.EsqlAstNode._
 import org.parboiled.scala._
 
 

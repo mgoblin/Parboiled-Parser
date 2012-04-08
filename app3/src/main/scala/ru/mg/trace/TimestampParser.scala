@@ -6,7 +6,7 @@ import org.parboiled.scala._
 trait TimestampParser extends Parser {
 
   def Timestamp: Rule1[String] = rule {
-    Date ~ WS ~ Time ~ dot ~ Millis ~~> { join }
+    Date ~ Space ~ Time ~ dot ~ Millis ~~> { join }
   }
 
   def Date: Rule1[String] = rule {
@@ -34,7 +34,7 @@ trait TimestampParser extends Parser {
 
   def DateSeparator = str("-") ~> { _.toString }
   def TimeSeparator = str(":") ~> { _.toString }
-  def WS = str(" ") ~> { _.toString }
+  def Space = str(" ") ~> { _.toString }
   def dot = str(".") ~> { _.toString }
 
   def join = {

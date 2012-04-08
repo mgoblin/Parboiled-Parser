@@ -1,11 +1,11 @@
 package ru.mg.esql
 
-import ast.AstNode
-import ru.mg.esql.ast.AstNode._
+import ru.mg.esql.ast.EsqlAstNode._
 import org.parboiled.scala._
+import ru.mg.esql.ast.EsqlAstNode
 
 
-class ESQLParser extends ModuleParser {
+trait ESQLParser extends ModuleParser {
 
   def InputESQL = rule { ESQLFile ~ EOI }
   
@@ -33,7 +33,7 @@ class ESQLParser extends ModuleParser {
     Identifier ~ zeroOrMore("." ~ Identifier)
   }
 
-  def Statement: Rule1[AstNode] = rule {
+  def Statement: Rule1[EsqlAstNode] = rule {
     (FunctionStatement | DeclareStatement | ModuleStatement | Comment) ~ WS
   }
 }

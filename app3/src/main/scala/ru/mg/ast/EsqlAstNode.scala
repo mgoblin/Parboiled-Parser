@@ -2,17 +2,17 @@ package ru.mg.esql.ast
 
 import org.parboiled.Context
 
-object AstNode {
+object EsqlAstNode {
 
   def moduleNode = {
-    (header: String, statements: List[AstNode], footer: String, context: Context[_]) =>
+    (header: String, statements: List[EsqlAstNode], footer: String, context: Context[_]) =>
       val startLine = context.getInputBuffer.getPosition(context.getStartIndex).line
       val endLine = context.getPosition.line
       new ModuleNode(header, startLine, endLine, statements)
   }
 
   def functionNode = {
-    (signature: String, body: List[AstNode], context: Context[_]) =>
+    (signature: String, body: List[EsqlAstNode], context: Context[_]) =>
       val startLine = context.getInputBuffer.getPosition(context.getStartIndex).line
       val endLine = context.getPosition.line
       new FunctionNode(signature.trim(), startLine, endLine, body)
@@ -68,33 +68,33 @@ object AstNode {
 
 }
 
-sealed abstract class AstNode(val text: String, val startLine: Long, val endLine: Long)
+sealed abstract class EsqlAstNode(val text: String, val startLine: Long, val endLine: Long)
 
 case class ModuleNode(
   override val text: String,
   override val startLine: Long,
   override val endLine: Long,
-  statements: List[AstNode])
-extends AstNode(text, startLine, endLine)
+  statements: List[EsqlAstNode])
+extends EsqlAstNode(text, startLine, endLine)
 
 case class FunctionNode(
   override val text: String,
   override val startLine: Long,
   override val endLine: Long,
-  statements: List[AstNode])
-extends AstNode(text, startLine, endLine)
+  statements: List[EsqlAstNode])
+extends EsqlAstNode(text, startLine, endLine)
 
 case class LineStatementNode(
   override val text: String,
   override val startLine: Long,
   override val endLine: Long)
-extends AstNode(text, startLine, endLine)
+extends EsqlAstNode(text, startLine, endLine)
 
 abstract case class CommentNode(
   override val text: String,
   override val startLine: Long,
   override val endLine: Long)
-extends AstNode(text, startLine, endLine)
+extends EsqlAstNode(text, startLine, endLine)
 
 case class LineCommentNode(
   override val text: String,
@@ -118,7 +118,7 @@ case class ExternalNode (
   override val text: String,
   override val startLine: Long,
   override val endLine: Long
-) extends AstNode(text, startLine, endLine)
+) extends EsqlAstNode(text, startLine, endLine)
 
 case class SchemaNode (
   override val text: String,
