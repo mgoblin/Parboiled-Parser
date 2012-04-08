@@ -3,7 +3,7 @@ package ru.mg.trace
 import org.specs.SpecificationWithJUnit
 import ru.mg.ast.TraceLineNode
 import io.Source
-import org.parboiled.scala.parserunners.{Rules, TracingParseRunner, ReportingParseRunner}
+import org.parboiled.scala.parserunners.ReportingParseRunner
 
 
 class TraceParserSpec extends SpecificationWithJUnit {
