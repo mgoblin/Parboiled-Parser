@@ -8,22 +8,31 @@ trait StatementTraceLineParser extends Parser {
 
   def StatementTraceLine = rule { StatementLine ~ EOI }
 
-  def StatementLine = rule { oneOrMore(!"Node" ~ ANY) ~ "Node" ~ "'" ~ NodeName ~ "'" ~~> { statementNode }}
+  def StatementLine = rule {
+    Node ~ StatementTrace ~ CodePlace ~~> { statementNode }
+  }
 
-  def NodeName = rule { oneOrMore(!"'" ~ ANY) ~> { _.toString } }
+  def Node: Rule1[String] = rule {
+    Prefix ~  WS ~ "'" ~ NodeName ~> { _.toString } ~ "'" ~ WS
+  }
+
+  def StatementTrace: Rule1[String] = rule {
+    ":" ~ WS ~ "Executing" ~ WS ~ "statement" ~ WS ~ "''" ~ Statement ~> { _.toString } ~ "''" ~ WS
+  }
+
+  def CodePlace = rule {
+    "at" ~ WS ~ "(" ~ WS ~ "'" ~ CodePartName ~> { _.toString } ~ "'" ~ WS
+  }
+
+  def CodePartName = rule { rule { oneOrMore(!"'" ~ ANY) } }
+  def NodeName = rule { oneOrMore(!"'" ~ ANY) }
+  def Statement = rule { oneOrMore(!"''" ~ ANY) }
+
+  def Prefix = rule { oneOrMore(!"Node" ~ ANY) ~ "Node" }
 
   // Whitespace rule
   def WS: Rule0 = rule {
     zeroOrMore(anyOf(" \t\n\r\f"))
   }
 
-  /**
-   * We redefine the default string-to-rule conversion to also match trailing whitespace if the string ends with
-   * a blank, this keeps the rules free from most whitespace matching clutter
-   */
-  override implicit def toRule(string: String) =
-    if (string.endsWith(" "))
-      str(string.trim) ~ WS
-    else
-      str(string)
 }

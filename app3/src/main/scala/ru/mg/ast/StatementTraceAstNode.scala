@@ -2,15 +2,16 @@ package ru.mg.ast
 
 object StatementTraceAstNode {
 
-  def statementNode = { (nodeName: String) =>
-    new StatementNode(nodeName, "", -1)
+  def statementNode = { (nodeName: String, statement: String, codePart: String) =>
+    new StatementNode(nodeName, statement, codePart, -1)
   }
 }
 
 sealed abstract class StatementTraceAstNode
 
 case class StatementNode(
-  val nodeName: String,
-  val statement: String,
-  val line: Long
+  nodeName: String,
+  statement: String,
+  codePart: String,
+  esqlLineNo: Long
 ) extends StatementTraceAstNode
