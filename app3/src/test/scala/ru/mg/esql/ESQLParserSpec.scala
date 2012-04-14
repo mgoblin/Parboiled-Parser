@@ -57,7 +57,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
     }
 
     "parse esql.txt" in {
-      val input = Source.fromURL(getClass.getResource("/esql.txt")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/esql.txt")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -69,8 +69,8 @@ class ESQLParserSpec extends SpecificationWithJUnit {
 
     }
 
-    "parse samples/ExceptionManager.esql" in {
-      val input = Source.fromURL(getClass.getResource("/samples/ExceptionManager.esql")).getLines().mkString("\n")
+    "parse esql.samples/ExceptionManager.esql" in {
+      val input = Source.fromURL(getClass.getResource("/esql/samples/ExceptionManager.esql")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -81,8 +81,8 @@ class ESQLParserSpec extends SpecificationWithJUnit {
 
     }
 
-    "parse samples/Logging.esql" in {
-      val input = Source.fromURL(getClass.getResource("/samples/Logging.esql")).getLines().mkString("\n")
+    "parse esql.samples/Logging.esql" in {
+      val input = Source.fromURL(getClass.getResource("/esql/samples/Logging.esql")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -93,8 +93,8 @@ class ESQLParserSpec extends SpecificationWithJUnit {
 
     }
 
-    "parse samples/Recode.esql" in {
-      val input = Source.fromURL(getClass.getResource("/samples/Recode.esql")).getLines().mkString("\n")
+    "parse esql.samples/Recode.esql" in {
+      val input = Source.fromURL(getClass.getResource("/esql/samples/Recode.esql")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -105,8 +105,8 @@ class ESQLParserSpec extends SpecificationWithJUnit {
 
     }
 
-    "parse samples/SettingsCache.esql" in {
-      val input = Source.fromURL(getClass.getResource("/samples/SettingsCache.esql")).getLines().mkString("\n")
+    "parse esql.samples/SettingsCache.esql" in {
+      val input = Source.fromURL(getClass.getResource("/esql/samples/SettingsCache.esql")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -117,8 +117,8 @@ class ESQLParserSpec extends SpecificationWithJUnit {
 
     }
 
-    "parse samples/SettingsCacheSubflow.esql" in {
-      val input = Source.fromURL(getClass.getResource("/samples/SettingsCacheSubflow.esql")).getLines().mkString("\n")
+    "parse esql.samples/SettingsCacheSubflow.esql" in {
+      val input = Source.fromURL(getClass.getResource("/esql/samples/SettingsCacheSubflow.esql")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -129,8 +129,8 @@ class ESQLParserSpec extends SpecificationWithJUnit {
 
     }
 
-    "parse samples/SettingsControl.esql" in {
-      val input = Source.fromURL(getClass.getResource("/samples/SettingsControl.esql")).getLines().mkString("\n")
+    "parse esql.samples/SettingsControl.esql" in {
+      val input = Source.fromURL(getClass.getResource("/esql/samples/SettingsControl.esql")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -141,8 +141,8 @@ class ESQLParserSpec extends SpecificationWithJUnit {
 
     }
 
-    "parse samples/SettingsUtil.esql" in {
-      val input = Source.fromURL(getClass.getResource("/samples/SettingsUtil.esql")).getLines().mkString("\n")
+    "parse esql.samples/SettingsUtil.esql" in {
+      val input = Source.fromURL(getClass.getResource("/esql/samples/SettingsUtil.esql")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -153,8 +153,8 @@ class ESQLParserSpec extends SpecificationWithJUnit {
 
     }
 
-    "parse samples/TechRecordation.esql" in {
-      val input = Source.fromURL(getClass.getResource("/samples/TechRecordation.esql")).getLines().mkString("\n")
+    "parse esql.samples/TechRecordation.esql" in {
+      val input = Source.fromURL(getClass.getResource("/esql/samples/TechRecordation.esql")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -165,8 +165,8 @@ class ESQLParserSpec extends SpecificationWithJUnit {
 
     }
 
-    "parse samples/Utils.esql" in {
-      val input = Source.fromURL(getClass.getResource("/samples/Utils.esql")).getLines().mkString("\n")
+    "parse esql.samples/Utils.esql" in {
+      val input = Source.fromURL(getClass.getResource("/esql/samples/Utils.esql")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false

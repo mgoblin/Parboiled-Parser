@@ -14,7 +14,7 @@ class ModuleParserSpec extends SpecificationWithJUnit {
 
   "Module parser" should {
     "parser empty module decl" in {
-      val input = Source.fromURL(getClass.getResource("/emptyModule.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/emptyModule.esql")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ModuleStatement).run(input)
 
       result.hasErrors must_== false
@@ -23,7 +23,7 @@ class ModuleParserSpec extends SpecificationWithJUnit {
     }
 
     "parse module with functions" in {
-      val input = Source.fromURL(getClass.getResource("/module1.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/module1.esql")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ModuleStatement).run(input)
 
       result.hasErrors must_== false
@@ -35,7 +35,7 @@ class ModuleParserSpec extends SpecificationWithJUnit {
     }
 
     "parse module with comment and function" in {
-      val input = Source.fromURL(getClass.getResource("/module2.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/module2.esql")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ModuleStatement).run(input)
 
       result.hasErrors must_== false
@@ -49,7 +49,7 @@ class ModuleParserSpec extends SpecificationWithJUnit {
     }
 
     "parse module with global vars and functions" in {
-      val input = Source.fromURL(getClass.getResource("/module3.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/module3.esql")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ModuleStatement).run(input)
 
       result.hasErrors must_== false

@@ -61,7 +61,7 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
     }
 
     "parse begin.esql" in {
-      val input = Source.fromURL(getClass.getResource("/begin.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/begin.esql")).getLines().mkString("\n")
       val out = "-- beginning of atomic block. Processing is single threaded until the END; is reached"
 
       val run = ReportingParseRunner(parser.BeginEndStatement).run(input)

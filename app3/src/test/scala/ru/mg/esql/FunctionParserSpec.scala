@@ -129,7 +129,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
   }
 
   "parse function from file function1.esql" in {
-    val input = Source.fromURL(getClass.getResource("/function1.esql")).getLines().mkString("\n")
+    val input = Source.fromURL(getClass.getResource("/esql/function1.esql")).getLines().mkString("\n")
     val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
     result.hasErrors must_== false
@@ -140,7 +140,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
   }
 
   "parse function from file function2.esql" in {
-    val input = Source.fromURL(getClass.getResource("/function2.esql")).getLines().mkString("\n")
+    val input = Source.fromURL(getClass.getResource("/esql/function2.esql")).getLines().mkString("\n")
     val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
     result.hasErrors must_== false
@@ -150,7 +150,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
   }
 
   "parse function from file function3.esql" in {
-    val input = Source.fromURL(getClass.getResource("/function2.esql")).getLines().mkString("\n")
+    val input = Source.fromURL(getClass.getResource("/esql/function2.esql")).getLines().mkString("\n")
     val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
     result.hasErrors must_== false
