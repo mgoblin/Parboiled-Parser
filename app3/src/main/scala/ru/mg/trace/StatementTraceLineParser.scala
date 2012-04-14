@@ -21,12 +21,17 @@ trait StatementTraceLineParser extends Parser {
   }
 
   def CodePlace = rule {
-    "at" ~ WS ~ "(" ~ WS ~ "'" ~ CodePartName ~> { _.toString } ~ "'" ~ WS
+    "at" ~ WS ~ "(" ~ WS ~ CodePart ~ WS ~ "," ~ WS ~ LineNo ~ WS ~ ")" ~ WS ~ "."
   }
+
+  def CodePart = rule {  "'" ~ CodePartName ~> { _.toString } ~ "'" }
+  def LineNo = rule {  "'" ~ Digits ~> { _.toLong } ~ "." ~ Digits ~ "'" }
 
   def CodePartName = rule { rule { oneOrMore(!"'" ~ ANY) } }
   def NodeName = rule { oneOrMore(!"'" ~ ANY) }
   def Statement = rule { oneOrMore(!"''" ~ ANY) }
+  def Digits = rule { oneOrMore(Digit) }
+  def Digit = rule { "0" - "9" }
 
   def Prefix = rule { oneOrMore(!"Node" ~ ANY) ~ "Node" }
 

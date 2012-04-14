@@ -19,6 +19,7 @@ class StatementTraceLineParserSpec extends SpecificationWithJUnit {
       result.nodeName must_== "Routing_using_memory_cache.Refresh memory cache"
       result.statement must_== "SET CacheQueueTable.valid VALUE  = NULL;"
       result.codePart must_== ".Refresh_memory_cache_Compute.Main"
+      result.esqlLineNo must_== 5
     }
   }
 }
