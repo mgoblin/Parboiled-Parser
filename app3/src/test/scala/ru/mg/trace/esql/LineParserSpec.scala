@@ -36,6 +36,16 @@ class LineParserSpec extends SpecificationWithJUnit {
       val result = run.resultValue
       result must_== "DECLARE CacheQueueTable ROW;"
     }
+
+    "parse syntactic path" in {
+      val input = "at ('.CacheQueueTable', '1.1')."
+
+      val run = ReportingParseRunner(parser.SyntacticPath).run(input)
+      run.hasErrors mustBe false
+
+      val result = run.resultValue
+      result must_== ".CacheQueueTable"
+    }
   }
 
 }

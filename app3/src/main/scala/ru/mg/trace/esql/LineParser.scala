@@ -6,7 +6,7 @@ trait LineParser extends Parser {
 
   def inputLine = rule { Line ~ EOI }
 
-  def Line = rule { Header ~ Node ~ StatementText /*~ SyntacticPath ~ RelativeLineNum*/ }
+  def Line = rule { Header ~ Node ~ StatementText ~ SyntacticPath ~ Position }
 
   def Header = rule { zeroOrMore(!":" ~ ANY) ~ ":" ~ WS }
 
@@ -17,6 +17,16 @@ trait LineParser extends Parser {
   def StatementText = rule { "Executing statement" ~ WS ~ "''" ~ Text ~> { _.toString } ~ "''" ~ WS }
 
   def Text = rule { zeroOrMore(!"''" ~ ANY) }
+
+  def SyntacticPath = rule { "at ('" ~ ModulePart ~> { _.toString } ~ "'," ~ WS }
+
+  def ModulePart = rule { zeroOrMore(!"'" ~ ANY) }
+
+  def Position = rule { "'" ~ LineNums ~ "')." ~ WS }
+
+  def LineNums = rule { num ~> { _.toInt } ~ "." ~ num }
+
+  def num = rule { oneOrMore("0" - "9") }
 
   // Whitespace rule
   def WS: Rule0 = rule {
