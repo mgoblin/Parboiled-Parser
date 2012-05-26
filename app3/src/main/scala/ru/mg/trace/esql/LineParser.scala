@@ -6,13 +6,17 @@ trait LineParser extends Parser {
 
   def inputLine = rule { Line ~ EOI }
 
-  def Line = rule { Header ~ Node /* ~ StatementText ~ SyntacticPath ~ RelativeLineNum*/ }
+  def Line = rule { Header ~ Node ~ StatementText /*~ SyntacticPath ~ RelativeLineNum*/ }
 
   def Header = rule { zeroOrMore(!":" ~ ANY) ~ ":" ~ WS }
 
-  def Node = rule { "Node" ~ WS ~ "'" ~ NodeName ~> { name => name.toString } ~ "':" ~ WS }
+  def Node = rule { "Node" ~ WS ~ "'" ~ NodeName ~> { _.toString } ~ "':" ~ WS }
 
   def NodeName = rule { zeroOrMore(!"':" ~ ANY) }
+
+  def StatementText = rule { "Executing statement" ~ WS ~ "''" ~ Text ~> { _.toString } ~ "''" ~ WS }
+
+  def Text = rule { zeroOrMore(!"''" ~ ANY) }
 
   // Whitespace rule
   def WS: Rule0 = rule {

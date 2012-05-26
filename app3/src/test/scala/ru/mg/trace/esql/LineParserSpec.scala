@@ -26,6 +26,16 @@ class LineParserSpec extends SpecificationWithJUnit {
       val result = run.resultValue
       result must_== "Routing_using_memory_cache.Find destination from in memory cache"
     }
+
+    "parse statement" in {
+      val input = "Executing statement   ''DECLARE CacheQueueTable ROW;'' at ('.CacheQueueTable', '1.1')."
+
+      val run = ReportingParseRunner(parser.StatementText).run(input)
+      run.hasErrors mustBe false
+
+      val result = run.resultValue
+      result must_== "DECLARE CacheQueueTable ROW;"
+    }
   }
 
 }
