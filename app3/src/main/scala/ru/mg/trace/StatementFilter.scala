@@ -9,17 +9,17 @@ import ru.mg.ast.TraceAstNode._
 
 class StatementFilter {
 
-  val parser = new StatementTraceLineParser { override val buildParseTree = true }
+  private val parser = new StatementTraceLineParser { override val buildParseTree = true }
 
   def filterStatementExecutions(traceLines: List[TraceLineNode]) = {
     traceLines.map(parseLineMessage).filter(isStatementExec).map(enrich)
   }
 
-  def parseLineMessage(traceLine: TraceLineNode) = {
+  private def parseLineMessage(traceLine: TraceLineNode) = {
     (traceLine, ReportingParseRunner(parser.StatementLine).run(traceLine.message))
   }
 
-  def isStatementExec(traceTuple: (TraceLineNode, ParsingResult[StatementNode])) = { !traceTuple._2.hasErrors }
+  private def isStatementExec(traceTuple: (TraceLineNode, ParsingResult[StatementNode])) = { !traceTuple._2.hasErrors }
 
-  def enrich(traceTuple: (TraceLineNode, ParsingResult[StatementNode])) =  { traceStatementNode(traceTuple) }
+  private def enrich(traceTuple: (TraceLineNode, ParsingResult[StatementNode])) =  { traceStatementNode(traceTuple) }
 }
