@@ -46,6 +46,16 @@ class LineParserSpec extends SpecificationWithJUnit {
       val result = run.resultValue
       result must_== ".CacheQueueTable"
     }
+
+    "parse position" in {
+      val input = "'1.2')."
+
+      val run = ReportingParseRunner(parser.Position).run(input)
+      run.hasErrors mustBe false
+
+      val result = run.resultValue
+      result must_== 1
+    }
   }
 
 }
