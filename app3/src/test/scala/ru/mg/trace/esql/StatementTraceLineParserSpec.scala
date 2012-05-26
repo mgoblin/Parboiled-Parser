@@ -1,4 +1,4 @@
-package ru.mg.trace
+package ru.mg.trace.esql
 
 import org.specs.SpecificationWithJUnit
 import org.parboiled.scala.parserunners.ReportingParseRunner
@@ -6,7 +6,9 @@ import org.parboiled.scala.parserunners.ReportingParseRunner
 
 class StatementTraceLineParserSpec extends SpecificationWithJUnit {
 
-  val parser = new StatementTraceLineParser { override val buildParseTree = true }
+  val parser = new StatementTraceLineParser {
+    override val buildParseTree = true
+  }
 
   "Statement trace line parser" should {
     "parse statement trace line" in {
