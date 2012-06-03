@@ -133,7 +133,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
     val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
     result.hasErrors must_== false
-    result.resultValue.startLine must_== 1
+    result.resultValue.linesRange must_== (1 to 7)
     result.resultValue.statements.length must_== 1
 
     result.resultValue.statements(0).isInstanceOf[BeginEndNode] must_== true
@@ -144,7 +144,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
     val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
     result.hasErrors must_== false
-    result.resultValue.startLine must_== 1
+    result.resultValue.linesRange must_== (1 to 8)
     result.resultValue.statements.length must_== 1
     result.resultValue.statements(0).isInstanceOf[BeginEndNode] must_== true
   }
@@ -154,7 +154,7 @@ class FunctionParserSpec extends SpecificationWithJUnit {
     val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
     result.hasErrors must_== false
-    result.resultValue.startLine must_== 1
+    result.resultValue.linesRange must_== (1 to 8)
     result.resultValue.statements.length must_== 1
     result.resultValue.statements(0).isInstanceOf[BeginEndNode] must_== true
   }

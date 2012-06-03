@@ -18,7 +18,7 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
 
       result mustNotBe null
       result.text must_== ""
-      result.startLine must_== 1
+      result.linesRange must_== (1 to 1)
     }
 
     "parse begin end statement with first line comment" in {
@@ -29,7 +29,7 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
 
       result mustNotBe null
       result.text must_== "-- start begin"
-      result.startLine must_== 1
+      result.linesRange must_== (1 to 1)
     }
 
     "parse begin end statement with first and last line comment" in {
@@ -43,7 +43,7 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
 
       result mustNotBe null
       result.text must_== "-- start begin"
-      result.startLine must_== 1
+      result.linesRange must_== (1 to 1)
     }
 
     "parse begin end statement with last line comment" in {
@@ -57,7 +57,7 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
 
       result mustNotBe null
       result.text must_== "-- start begin\n    call;"
-      result.startLine must_== 1
+      result.linesRange must_== (1 to 2)
     }
 
     "parse begin.esql" in {
