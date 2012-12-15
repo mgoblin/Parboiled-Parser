@@ -8,7 +8,6 @@ CREATE COMPUTE MODULE TechRecordation_CallWriteEvent
 		-- CALL CopyMessageHeaders();
 		-- CALL CopyEntireMessage();
 		
-		--Параметры сообщения
 		DECLARE inEncoding INT;
 		DECLARE inCCSID INT; 
 

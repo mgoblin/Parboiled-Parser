@@ -70,7 +70,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
     }
 
     "parse esql.samples/ExceptionManager.esql" in {
-      val input = Source.fromURL(getClass.getResource("/esql/samples/ExceptionManager.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/samples/ExceptionManager.esql"))(scala.io.Codec("UTF-8")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -82,7 +82,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
     }
 
     "parse esql.samples/Logging.esql" in {
-      val input = Source.fromURL(getClass.getResource("/esql/samples/Logging.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/samples/Logging.esql"))(scala.io.Codec("UTF-8")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -94,7 +94,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
     }
 
     "parse esql.samples/Recode.esql" in {
-      val input = Source.fromURL(getClass.getResource("/esql/samples/Recode.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/samples/Recode.esql"))(scala.io.Codec("UTF-8")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -106,7 +106,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
     }
 
     "parse esql.samples/SettingsCache.esql" in {
-      val input = Source.fromURL(getClass.getResource("/esql/samples/SettingsCache.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/samples/SettingsCache.esql"))(scala.io.Codec("UTF-8")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -118,7 +118,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
     }
 
     "parse esql.samples/SettingsCacheSubflow.esql" in {
-      val input = Source.fromURL(getClass.getResource("/esql/samples/SettingsCacheSubflow.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/samples/SettingsCacheSubflow.esql"))(scala.io.Codec("UTF-8")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -130,7 +130,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
     }
 
     "parse esql.samples/SettingsControl.esql" in {
-      val input = Source.fromURL(getClass.getResource("/esql/samples/SettingsControl.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/samples/SettingsControl.esql"))(scala.io.Codec("UTF-8")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -142,7 +142,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
     }
 
     "parse esql.samples/SettingsUtil.esql" in {
-      val input = Source.fromURL(getClass.getResource("/esql/samples/SettingsUtil.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/samples/SettingsUtil.esql"))(scala.io.Codec("UTF-8")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -154,7 +154,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
     }
 
     "parse esql.samples/TechRecordation.esql" in {
-      val input = Source.fromURL(getClass.getResource("/esql/samples/TechRecordation.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/samples/TechRecordation.esql"))(scala.io.Codec("UTF-8")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false
@@ -166,7 +166,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
     }
 
     "parse esql.samples/Utils.esql" in {
-      val input = Source.fromURL(getClass.getResource("/esql/samples/Utils.esql")).getLines().mkString("\n")
+      val input = Source.fromURL(getClass.getResource("/esql/samples/Utils.esql"))(scala.io.Codec("UTF-8")).getLines().mkString("\n")
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
       result.hasErrors must_== false

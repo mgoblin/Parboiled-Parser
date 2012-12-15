@@ -9,11 +9,9 @@ CREATE COMPUTE MODULE SettingsControl_DetectOperation
 		DECLARE OPERATION CHARACTER FIELDNAME(InputRoot.XMLNSC.*:*[<]);
 		
 		IF (OPERATION='SettingsUpdateRq') THEN
-			-- Запрос на обновление настройки из БД
 			Set OutputLocalEnvironment.Destination.RouterList.DestinationData[1].labelName = 'SettingsUpdateRq';
 		ELSEIF (OPERATION='SettingsRemoveRq') THEN
-			-- Запрос на удаление записи из ТН
-			Set OutputLocalEnvironment.Destination.RouterList.DestinationData[1].labelName = 'SettingsRemoveRq';			
+			Set OutputLocalEnvironment.Destination.RouterList.DestinationData[1].labelName = 'SettingsRemoveRq';
 		ELSE
 			THROW USER EXCEPTION VALUES ('Unknown format XML', OPERATION);
 		END IF;
@@ -30,7 +28,6 @@ CREATE COMPUTE MODULE SettingsControl_UpdateSettingsTable
 	CREATE FUNCTION Main() RETURNS BOOLEAN
 	BEGIN
 		IF (InputRoot.XMLNSC.ns:SettingsUpdateRq.SettingName IS NOT NULL) THEN
-			-- Обновляем настройку из БД
 			CALL UpdateSettingsTable(FIELDVALUE(InputRoot.XMLNSC.ns:SettingsUpdateRq.SettingName));
 		ELSE
 			THROW USER EXCEPTION VALUES ('Wrong message format', InputRoot.XMLNSC);
@@ -44,7 +41,6 @@ CREATE COMPUTE MODULE SettingsControl_RemoveSettingsRecord
 	CREATE FUNCTION Main() RETURNS BOOLEAN
 	BEGIN
 		IF (InputRoot.XMLNSC.ns:SettingsUpdateRq.SettingName IS NOT NULL) THEN
-			-- Обновляем настройку из БД
 			CALL UpdateSettingsTable(FIELDVALUE(InputRoot.XMLNSC.ns:SettingsUpdateRq.SettingName));
 		ELSE
 			THROW USER EXCEPTION VALUES ('Wrong message format', InputRoot.XMLNSC);
