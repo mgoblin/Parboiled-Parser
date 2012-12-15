@@ -1,13 +1,13 @@
 package ru.mg.parsing.broker.trace.statement.exec.parser
 
 import org.parboiled.scala.parserunners.ReportingParseRunner
-import ru.mg.parsing.broker.trace.parser.TraceParser
 import ru.mg.parsing.broker.trace.filter.ESQLStatementTraceFilter
+import ru.mg.parsing.broker.trace.parser.parts.common.CommonTraceParser
 
 
 trait TraceStatementsParser {
 
-  private val traceParser = new TraceParser {
+  private val traceParser = new CommonTraceParser {
     override val buildParseTree = true
   }
 

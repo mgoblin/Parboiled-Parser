@@ -1,8 +1,8 @@
 package ru.mg.trace
 
-import org.specs.SpecificationWithJUnit
 import io.Source
 import ru.mg.parsing.broker.trace.statement.exec.parser.TraceStatementsParser
+import org.specs2.mutable.SpecificationWithJUnit
 
 
 class TraceStatementsParserSpec extends SpecificationWithJUnit {
@@ -15,7 +15,7 @@ class TraceStatementsParserSpec extends SpecificationWithJUnit {
 
       val statements = parser.parse(input)
 
-      statements mustNotBe empty
+      statements must_!= empty
 
       statements.size must_== 7
 

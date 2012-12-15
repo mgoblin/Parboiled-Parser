@@ -1,6 +1,6 @@
 package ru.mg.esql
 
-import org.specs.SpecificationWithJUnit
+import org.specs2.mutable.SpecificationWithJUnit
 import io.Source
 import org.parboiled.scala.parserunners.ReportingParseRunner
 import ru.mg.parsing.esql.parts.StatementParser
@@ -17,7 +17,7 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
       val run = ReportingParseRunner(parser.BeginEndStatement).run(input)
       val result = run.resultValue
 
-      result mustNotBe null
+      result must_!=  null
       result.text must_== ""
       result.linesRange must_== (1 to 1)
     }
@@ -28,7 +28,7 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
       val run = ReportingParseRunner(parser.BeginEndStatement).run(input)
       val result = run.resultValue
 
-      result mustNotBe null
+      result must_!= null
       result.text must_== "-- start begin"
       result.linesRange must_== (1 to 1)
     }
@@ -42,7 +42,7 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
       val run = ReportingParseRunner(parser.BeginEndStatement).run(input)
       val result = run.resultValue
 
-      result mustNotBe null
+      result must_!= null
       result.text must_== "-- start begin"
       result.linesRange must_== (1 to 1)
     }
@@ -56,7 +56,7 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
       val run = ReportingParseRunner(parser.BeginEndStatement).run(input)
       val result = run.resultValue
 
-      result mustNotBe null
+      result must_!= null
       result.text must_== "-- start begin\n    call;"
       result.linesRange must_== (1 to 2)
     }
@@ -67,7 +67,7 @@ class BeginEndStatementSpec extends SpecificationWithJUnit {
 
       val run = ReportingParseRunner(parser.BeginEndStatement).run(input)
       val result = run.resultValue
-      result mustNotBe null
+      result must_!= null
       result.text must_== out
     }
   }

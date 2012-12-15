@@ -1,4 +1,4 @@
-package ru.mg.parsing.broker.trace.parser.parts.common
+package ru.mg.parsing.broker.trace.parser.parts
 
 import org.parboiled.scala._
 

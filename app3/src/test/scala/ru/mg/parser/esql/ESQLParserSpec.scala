@@ -1,6 +1,5 @@
 package ru.mg.esql
 
-import org.specs._
 import org.parboiled.scala.parserunners.ReportingParseRunner
 import org.parboiled.scala._
 import scala.io.Source
@@ -10,6 +9,7 @@ import ru.mg.parsing.ast.LineCommentNode
 import ru.mg.parsing.ast.LineStatementNode
 import ru.mg.parsing.ast.ModuleNode
 import ru.mg.parsing.esql.parser.ESQLParser
+import org.specs2.mutable.SpecificationWithJUnit
 
 class ESQLParserSpec extends SpecificationWithJUnit {
 
@@ -23,7 +23,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
       val input = "declare CacheQueueTable SHARED ROW;"
       val result = ReportingParseRunner(parser.Statement).run(input)
 
-      result.hasErrors mustBe false
+      result.hasErrors must_==  false
       result.resultValue.text must_== "CacheQueueTable SHARED ROW"
     }
 
@@ -31,9 +31,9 @@ class ESQLParserSpec extends SpecificationWithJUnit {
       val input = "-- This is a comment"
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
-      result.hasErrors mustBe false
-      result.parseTreeRoot mustNotBe null
-      result.parseTreeRoot.getChildren mustNotBe empty
+      result.hasErrors must_==  false
+      result.parseTreeRoot must_!=  null
+      result.parseTreeRoot.getChildren must_!=  empty
 
     }
 
@@ -44,9 +44,9 @@ class ESQLParserSpec extends SpecificationWithJUnit {
         """
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
-      result.hasErrors mustBe false
-      result.parseTreeRoot mustNotBe null
-      result.parseTreeRoot.getChildren mustNotBe empty
+      result.hasErrors must_== false
+      result.parseTreeRoot must_!= null
+      result.parseTreeRoot.getChildren must_!= empty
     }
 
     "parse file with module declaration" in {
@@ -55,9 +55,9 @@ class ESQLParserSpec extends SpecificationWithJUnit {
           "END MODULE;\n\n"
       val result = ReportingParseRunner(parser.ESQLFile).run(input)
 
-      result.hasErrors mustBe false
-      result.parseTreeRoot mustNotBe null
-      result.parseTreeRoot.getChildren mustNotBe empty
+      result.hasErrors must_== false
+      result.parseTreeRoot must_!= null
+      result.parseTreeRoot.getChildren must_!= empty
 
     }
 

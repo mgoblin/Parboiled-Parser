@@ -1,7 +1,7 @@
 package ru.mg.parsing.broker.trace.statement.exec.ast
 
 import org.parboiled.scala.ParsingResult
-import ru.mg.parsing.broker.trace.ast.{TraceLineNode, TraceStatementNode}
+import ru.mg.parsing.broker.trace.ast.{BrokerTraceLineNode, BrokerTraceStatementNode}
 
 object StatementTraceAstNode {
 
@@ -9,8 +9,8 @@ object StatementTraceAstNode {
     new StatementNode(nodeName, statement, codePart, lineNo)
   }
 
-  def traceStatementNode(traceTuple: (TraceLineNode, ParsingResult[StatementNode])) = {
-    new  TraceStatementNode (
+  def traceStatementNode(traceTuple: (BrokerTraceLineNode, ParsingResult[StatementNode])) = {
+    new  BrokerTraceStatementNode (
       traceTuple._1.timestamp,
       traceTuple._1.threadId,
       traceTuple._1.traceType,

@@ -1,10 +1,10 @@
 package ru.mg.esql
 
-import org.specs.SpecificationWithJUnit
 import scala.io.Source
 import org.parboiled.scala.parserunners.ReportingParseRunner
 import ru.mg.parsing.esql.parts.FunctionParser
 import ru.mg.parsing.ast.BeginEndNode
+import org.specs2.mutable.SpecificationWithJUnit
 
 
 class FunctionParserSpec extends SpecificationWithJUnit {

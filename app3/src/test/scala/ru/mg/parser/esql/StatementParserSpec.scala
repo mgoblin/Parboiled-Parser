@@ -1,20 +1,20 @@
 package ru.mg.esql
 
-import org.specs.SpecificationWithJUnit
 import org.parboiled.scala.ParsingResult
 import org.parboiled.scala.parserunners.ReportingParseRunner
 import ru.mg.parsing.esql.parts.StatementParser
 import ru.mg.parsing.ast.EsqlAstNode
+import org.specs2.mutable.SpecificationWithJUnit
 
 
 class StatementParserSpec extends SpecificationWithJUnit {
 
   val parser = new StatementParser { override val buildParseTree = true }
 
-  def check(result: ParsingResult[EsqlAstNode], text: String): Any = {
-    result.hasErrors mustBe false
-    result.parseTreeRoot mustNotBe null
-    result.parseTreeRoot.getChildren mustNotBe empty
+  def check(result: ParsingResult[EsqlAstNode], text: String) {
+    result.hasErrors must_== false
+    result.parseTreeRoot must_!=  null
+    result.parseTreeRoot.getChildren must_!= empty
 
     val node = result.resultValue
     node.text must_== text

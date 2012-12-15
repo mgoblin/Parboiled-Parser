@@ -1,10 +1,10 @@
 package ru.mg.esql
 
-import org.specs.SpecificationWithJUnit
 import io.Source
 import org.parboiled.scala._
 import ru.mg.parsing.esql.parts.ModuleParser
 import ru.mg.parsing.ast.{CommentNode, LineStatementNode, FunctionNode}
+import org.specs2.mutable.SpecificationWithJUnit
 
 
 class ModuleParserSpec extends SpecificationWithJUnit {

@@ -1,8 +1,8 @@
 package ru.mg.trace
 
-import org.specs.SpecificationWithJUnit
 import org.parboiled.scala.parserunners.ReportingParseRunner
-import ru.mg.parsing.broker.trace.parser.parts.common.TimestampParser
+import ru.mg.parsing.broker.trace.parser.parts.TimestampParser
+import org.specs2.mutable.SpecificationWithJUnit
 
 
 class TimestampParserSpec extends SpecificationWithJUnit {
@@ -18,7 +18,7 @@ class TimestampParserSpec extends SpecificationWithJUnit {
       val run = ReportingParseRunner(parser.Timestamp).run(input)
       val result = run.resultValue
 
-      result mustNotBe null
+      result must_!= null
       result must_== input
     }
 

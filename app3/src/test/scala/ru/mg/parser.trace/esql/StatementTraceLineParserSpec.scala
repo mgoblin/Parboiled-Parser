@@ -1,8 +1,8 @@
 package ru.mg.trace.esql
 
-import org.specs.SpecificationWithJUnit
 import org.parboiled.scala.parserunners.ReportingParseRunner
 import ru.mg.parsing.broker.trace.parser.parts.statement.exec.StatementTraceLineParser
+import org.specs2.mutable.SpecificationWithJUnit
 
 
 class StatementTraceLineParserSpec extends SpecificationWithJUnit {

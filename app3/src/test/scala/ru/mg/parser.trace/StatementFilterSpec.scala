@@ -1,28 +1,28 @@
 package ru.mg.trace
 
-import org.specs.SpecificationWithJUnit
 import io.Source
 import org.parboiled.scala.parserunners.ReportingParseRunner
-import ru.mg.parsing.broker.trace.parser.TraceParser
 import ru.mg.parsing.broker.trace.filter.ESQLStatementTraceFilter
+import ru.mg.parsing.broker.trace.parser.parts.common.CommonTraceParser
+import org.specs2.mutable.SpecificationWithJUnit
 
 
 class StatementFilterSpec extends SpecificationWithJUnit {
 
   val filter = new ESQLStatementTraceFilter()
-  val parser = new TraceParser { override val buildParseTree = true }
+  val parser = new CommonTraceParser { override val buildParseTree = true }
 
   "Statement filter" should {
     "filter not statement lines from parser.trace" in {
       val inputStrings = Source.fromURL(getClass.getResource("/traces/traceForStatementFilter.txt")).getLines().mkString("\n")
       val inputTrace = ReportingParseRunner(parser.Trace).run(inputStrings).resultValue
 
-      inputTrace mustNotBe null
+      inputTrace must_!= null
 
       val statements = filter.filterStatementExecutions(inputTrace)
 
 
-      statements mustNotBe empty
+      statements must_!= empty
 
       statements.size must_== 7
 

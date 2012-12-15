@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ru.mg.scala</groupId>
     <artifactId>app3</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.4-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Parboiled parser sample</description>
     <inceptionYear>2011</inceptionYear>
@@ -19,7 +19,7 @@
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
         <encoding>UTF-8</encoding>
-        <scala.version>2.9.1</scala.version>
+        <scala.version>2.9.2</scala.version>
     </properties>
 
     <dependencies>
@@ -31,8 +31,8 @@
 
         <dependency>
             <groupId>org.parboiled</groupId>
-            <artifactId>parboiled-scala</artifactId>
-            <version>1.0.2</version>
+            <artifactId>parboiled-scala_2.9.2</artifactId>
+            <version>1.1.4</version>
         </dependency>
 
         <!-- Test -->
@@ -43,9 +43,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.scala-tools.testing</groupId>
-            <artifactId>specs_${scala.version}</artifactId>
-            <version>1.6.9</version>
+            <groupId>org.specs2</groupId>
+            <artifactId>specs2_${scala.version}</artifactId>
+            <version>1.12.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
