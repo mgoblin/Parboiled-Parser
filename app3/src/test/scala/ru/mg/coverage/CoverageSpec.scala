@@ -1,8 +1,8 @@
 package ru.mg.coverage
 
 import org.specs.SpecificationWithJUnit
-import ru.mg.esql.ast._
-import ru.mg.ast.TraceStatementNode
+import ru.mg.parsing.ast.ModuleNode
+import ru.mg.parsing.broker.trace.ast.TraceStatementNode
 
 
 class CoverageSpec extends SpecificationWithJUnit {

@@ -1,8 +1,8 @@
 package ru.mg.coverage
 
 
-import ru.mg.esql.ast.EsqlAstNode
-import ru.mg.ast.TraceStatementNode
+import ru.mg.parsing.ast.EsqlAstNode
+import ru.mg.parsing.broker.trace.ast.TraceStatementNode
 
 
 object Coverage {
