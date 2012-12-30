@@ -17,10 +17,10 @@ object TraceMatcher {
   }
 
   @tailrec
-  def traverseTree(queue: List[EsqlAstNode],
+  def traverseTree(nodes: List[EsqlAstNode],
                    accumulator: List[CoverageNode],
                    transform: EsqlAstNode => CoverageNode): List[CoverageNode] = {
-    queue match {
+    nodes match {
 
       case currentNode :: queueTail =>
         val nodeStatements = getChildrenStatements(currentNode)
