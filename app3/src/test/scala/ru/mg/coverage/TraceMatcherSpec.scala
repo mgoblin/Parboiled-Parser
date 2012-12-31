@@ -1,8 +1,6 @@
 package ru.mg.coverage
 
-import ast.CoverageNode
 import org.specs2.mutable.SpecificationWithJUnit
-import ru.mg.parsing.ast.EsqlAstNode
 import ru.mg.parsing.broker.trace.ast.BrokerTraceStatementNode
 import ru.mg.coverage.dsl.DSL._
 
@@ -34,19 +32,9 @@ class TraceMatcherSpec extends SpecificationWithJUnit {
       esqlNodes(1).linesRange.start must_== 12
       esqlNodes(1).linesRange.end must_== 50
 
-      var traversedNodes = List[EsqlAstNode]()
-      val coverageNodes = new TraceMatcher(trace).traverseTree(esqlNodes, Nil, esql => {
-        traversedNodes = esql :: traversedNodes
-        new CoverageNode(esql, trace)
-      })
+      val coverageNodes = new TraceMatcher(trace).traverseTree(esqlNodes)
 
       coverageNodes.size must_== 6
-    }
-
-    "link esql with traces" in {
-
-      val coverageNodes = new TraceMatcher(trace).traverseTree(esqlNodes, Nil, esql => new CoverageNode(esql, trace))
-      coverageNodes must_!= null
     }
   }
 }

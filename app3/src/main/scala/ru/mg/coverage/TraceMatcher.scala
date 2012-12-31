@@ -3,13 +3,19 @@ package ru.mg.coverage
 
 import ast.CoverageNode
 import ru.mg.parsing.ast.{FunctionNode, ModuleNode, EsqlAstNode}
-import annotation.tailrec
-import ru.mg.parsing.broker.trace.ast.BrokerTraceAstNode
+import ru.mg.parsing.broker.trace.ast.{BrokerTraceStatementNode, BrokerTraceAstNode}
 
 
-class TraceMatcher(val traces: List[BrokerTraceAstNode]) {
+class TraceMatcher(val traces: List[BrokerTraceAstNode]) extends TreeTraversal[EsqlAstNode, CoverageNode, List[CoverageNode]] {
 
-  private def getChildrenStatements(node: EsqlAstNode) = {
+  def getChildrenNodes[R >: EsqlAstNode](node: R) = getChildrenStatements(node)
+  def transform[R >: EsqlAstNode](node: R) = makeCoverageNode(node)
+  def accumulate[R >: CoverageNode](outputNode: R, oldAccumulator: List[CoverageNode]): List[CoverageNode] = {
+    outputNode.asInstanceOf[CoverageNode] :: oldAccumulator
+  }
+  def defaultAccumulator(): List[CoverageNode] = List()
+
+  private def getChildrenStatements[R >: EsqlAstNode](node: R) = {
     node match {
       case module: ModuleNode => module.statements
       case function: FunctionNode => function.statements
@@ -17,32 +23,20 @@ class TraceMatcher(val traces: List[BrokerTraceAstNode]) {
     }
   }
 
-  private def getTracesForNode(node: EsqlAstNode): List[BrokerTraceAstNode] = {
-    traces
+  //TODO Учитывать в каком модуле расположена EsqlNode
+  private def getTracesForNode[R >: EsqlAstNode](node: R): List[BrokerTraceAstNode] = {
+    traces.filter(trace =>  {
+      trace match {
+        case statement: BrokerTraceStatementNode => node.asInstanceOf[EsqlAstNode].linesRange contains statement.esqlLineNo
+        case _ => false
+      }
+    })
   }
 
-  private def makeCoverageNode(esqlNode: EsqlAstNode) = {
-    new CoverageNode(esqlNode, getTracesForNode(esqlNode))
+  private def makeCoverageNode[R >: EsqlAstNode](esqlNode: R) = {
+    new CoverageNode(esqlNode.asInstanceOf[EsqlAstNode], getTracesForNode(esqlNode))
   }
 
-  @tailrec
-  private [coverage] final def traverseTree(nodes: List[EsqlAstNode],
-                   accumulator: List[CoverageNode],
-                   transform: EsqlAstNode => CoverageNode): List[CoverageNode] = {
-    nodes match {
-
-      case currentNode :: queueTail =>
-        val nodeStatements = getChildrenStatements(currentNode)
-        val coverage = transform(currentNode)
-        traverseTree(nodeStatements ::: queueTail, coverage :: accumulator, transform)
-
-      case Nil =>
-        accumulator.reverse
-    }
-  }
-
-  def matchTraces(nodes: List[EsqlAstNode]) = {
-    traverseTree(nodes, List(), makeCoverageNode)
-  }
+  def matchTraces(nodes: List[EsqlAstNode]) = { traverseTree(nodes) }
 
 }
