@@ -4,13 +4,13 @@
     <facet type="scala" name="Scala">
       <configuration>
         <option name="compilerLibraryLevel" value="Project" />
-        <option name="compilerLibraryName" value="Maven: org.scala-lang:scala-library:2.9.2" />
+        <option name="compilerLibraryName" value="Maven: org.scala-lang:scala-compiler-bundle:2.9.2" />
         <option name="maximumHeapSize" value="1024" />
         <option name="vmOptions" value="-Xms64m" />
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_6" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_7" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -27,8 +27,7 @@
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.8.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.specs2:specs2_2.9.2:1.12.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.specs2:specs2-scalaz-core_2.9.2:6.0.1" level="project" />
-    <orderEntry type="library" name="scala-compiler" level="application" />
-    <orderEntry type="library" name="scala-library" level="application" />
+    <orderEntry type="library" name="Maven: org.scala-lang:scala-compiler-bundle:2.9.2" level="project" />
   </component>
 </module>
 

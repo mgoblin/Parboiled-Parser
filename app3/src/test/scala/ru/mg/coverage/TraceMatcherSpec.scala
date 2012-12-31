@@ -35,7 +35,7 @@ class TraceMatcherSpec extends SpecificationWithJUnit {
       esqlNodes(1).linesRange.end must_== 50
 
       var traversedNodes = List[EsqlAstNode]()
-      val coverageNodes = TraceMatcher.traverseTree(esqlNodes, Nil, esql => {
+      val coverageNodes = new TraceMatcher(trace).traverseTree(esqlNodes, Nil, esql => {
         traversedNodes = esql :: traversedNodes
         new CoverageNode(esql, trace)
       })
@@ -45,7 +45,7 @@ class TraceMatcherSpec extends SpecificationWithJUnit {
 
     "link esql with traces" in {
 
-      val coverageNodes = TraceMatcher.traverseTree(esqlNodes, Nil, esql => new CoverageNode(esql, trace))
+      val coverageNodes = new TraceMatcher(trace).traverseTree(esqlNodes, Nil, esql => new CoverageNode(esql, trace))
       coverageNodes must_!= null
     }
   }

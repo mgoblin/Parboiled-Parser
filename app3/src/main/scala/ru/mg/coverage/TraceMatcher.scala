@@ -4,9 +4,10 @@ package ru.mg.coverage
 import ast.CoverageNode
 import ru.mg.parsing.ast.{FunctionNode, ModuleNode, EsqlAstNode}
 import annotation.tailrec
+import ru.mg.parsing.broker.trace.ast.BrokerTraceAstNode
 
 
-object TraceMatcher {
+class TraceMatcher(val traces: List[BrokerTraceAstNode]) {
 
   private def getChildrenStatements(node: EsqlAstNode) = {
     node match {
@@ -16,8 +17,16 @@ object TraceMatcher {
     }
   }
 
+  private def getTracesForNode(node: EsqlAstNode): List[BrokerTraceAstNode] = {
+    traces
+  }
+
+  private def makeCoverageNode(esqlNode: EsqlAstNode) = {
+    new CoverageNode(esqlNode, getTracesForNode(esqlNode))
+  }
+
   @tailrec
-  def traverseTree(nodes: List[EsqlAstNode],
+  private [coverage] final def traverseTree(nodes: List[EsqlAstNode],
                    accumulator: List[CoverageNode],
                    transform: EsqlAstNode => CoverageNode): List[CoverageNode] = {
     nodes match {
@@ -30,6 +39,10 @@ object TraceMatcher {
       case Nil =>
         accumulator.reverse
     }
+  }
+
+  def matchTraces(nodes: List[EsqlAstNode]) = {
+    traverseTree(nodes, List(), makeCoverageNode)
   }
 
 }
