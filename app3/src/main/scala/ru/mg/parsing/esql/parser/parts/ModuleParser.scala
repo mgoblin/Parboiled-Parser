@@ -25,13 +25,7 @@ trait ModuleParser extends FunctionParser {
   }
 
   def ModuleBody = rule {
-    zeroOrMore((Comment | FunctionStatement | moduleLineStatement) ~ WS)
-  }
-
-  def moduleLineStatement = rule {
-    zeroOrMore(!(ModuleFooter | StatementDelimiter ~> {
-      _.toString
-    }) ~ ANY) ~> withContext(lineStatementNode) ~ StatementDelimiter
+    zeroOrMore((Comment | FunctionStatement | DeclareStatement ) ~ WS)
   }
 
   def ModuleName = Identifier
