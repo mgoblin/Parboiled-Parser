@@ -1,4 +1,4 @@
-package ru.mg.parsing.esql.parts
+package ru.mg.parsing.esql.parser.parts
 
 import org.parboiled.scala._
 

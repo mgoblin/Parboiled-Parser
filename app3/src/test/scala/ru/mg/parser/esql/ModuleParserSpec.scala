@@ -1,9 +1,9 @@
-package ru.mg.esql
+package ru.mg.parser.esql
 
 import io.Source
 import org.parboiled.scala._
-import ru.mg.parsing.esql.parts.ModuleParser
-import ru.mg.parsing.ast.{CommentNode, LineStatementNode, FunctionNode}
+import ru.mg.parsing.esql.parser.parts.ModuleParser
+import ru.mg.parsing.esql.ast.{CommentNode, LineStatementNode, FunctionNode}
 import org.specs2.mutable.SpecificationWithJUnit
 
 

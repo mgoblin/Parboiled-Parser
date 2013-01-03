@@ -1,4 +1,4 @@
-package ru.mg.parsing.ast
+package ru.mg.parsing.esql.ast
 
 import org.parboiled.Context
 
@@ -68,56 +68,66 @@ object EsqlAstNode {
 
 }
 
-sealed abstract class EsqlAstNode(val text: String, val linesRange: Range)
+sealed abstract class EsqlAstNode(val text: String, val linesRange: Range, val parent: Option[EsqlAstNode] = None)
 
 case class ModuleNode(
   override val text: String,
   override val linesRange: Range,
-  statements: List[EsqlAstNode])
-extends EsqlAstNode(text, linesRange: Range)
+  statements: List[EsqlAstNode],
+  override val parent: Option[EsqlAstNode] = None)
+extends EsqlAstNode(text, linesRange: Range, parent)
 
 case class FunctionNode(
   override val text: String,
   override val linesRange: Range,
-  statements: List[EsqlAstNode])
-extends EsqlAstNode(text, linesRange: Range)
+  statements: List[EsqlAstNode],
+  override val parent: Option[EsqlAstNode] = None)
+extends EsqlAstNode(text, linesRange: Range, parent)
 
 case class LineStatementNode(
   override val text: String,
-  override val linesRange: Range)
-extends EsqlAstNode(text, linesRange: Range)
+  override val linesRange: Range,
+  override val parent: Option[EsqlAstNode] = None)
+extends EsqlAstNode(text, linesRange: Range, parent)
 
 abstract case class CommentNode(
   override val text: String,
-  override val linesRange: Range)
-extends EsqlAstNode(text, linesRange: Range)
+  override val linesRange: Range,
+  override val parent: Option[EsqlAstNode] = None)
+extends EsqlAstNode(text, linesRange: Range, parent)
 
 case class LineCommentNode(
   override val text: String,
-  override val linesRange: Range)
-extends CommentNode(text, linesRange: Range)
+  override val linesRange: Range,
+  override val parent: Option[EsqlAstNode] = None)
+extends CommentNode(text, linesRange: Range, parent)
 
 case class BlockCommentNode (
   override val text: String,
-  override val linesRange: Range
-) extends CommentNode(text, linesRange: Range)
+  override val linesRange: Range,
+  override val parent: Option[EsqlAstNode] = None
+) extends CommentNode(text, linesRange: Range, parent)
 
 case class BeginEndNode (
   override val text: String,
-  override val linesRange: Range
-) extends LineStatementNode(text, linesRange: Range)
+  override val linesRange: Range,
+  override val parent: Option[EsqlAstNode] = None
+) extends LineStatementNode(text, linesRange: Range, parent)
 
 case class ExternalNode (
   override val text: String,
-  override val linesRange: Range
-) extends LineStatementNode(text, linesRange: Range)
+  override val linesRange: Range,
+  override val parent: Option[EsqlAstNode] = None
+) extends LineStatementNode(text, linesRange: Range, parent)
 
 case class SchemaNode (
   override val text: String,
-  override val linesRange: Range
-) extends LineStatementNode(text, linesRange: Range)
+  override val linesRange: Range,
+  override val parent: Option[EsqlAstNode] = None
+) extends LineStatementNode(text, linesRange: Range, parent)
 
 case class PathNode (
   override val text: String,
-  override val linesRange: Range
-) extends LineStatementNode(text, linesRange: Range)
+  override val linesRange: Range,
+  override val parent: Option[EsqlAstNode] = None
+) extends LineStatementNode(text, linesRange: Range, parent)

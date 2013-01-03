@@ -1,13 +1,13 @@
-package ru.mg.esql
+package ru.mg.parser.esql
 
 import org.parboiled.scala.parserunners.ReportingParseRunner
 import org.parboiled.scala._
 import scala.io.Source
-import ru.mg.parsing.ast._
-import ru.mg.parsing.ast.FunctionNode
-import ru.mg.parsing.ast.LineCommentNode
-import ru.mg.parsing.ast.LineStatementNode
-import ru.mg.parsing.ast.ModuleNode
+import ru.mg.parsing.esql.ast._
+import ru.mg.parsing.esql.ast.FunctionNode
+import ru.mg.parsing.esql.ast.LineCommentNode
+import ru.mg.parsing.esql.ast.LineStatementNode
+import ru.mg.parsing.esql.ast.ModuleNode
 import ru.mg.parsing.esql.parser.ESQLParser
 import org.specs2.mutable.SpecificationWithJUnit
 

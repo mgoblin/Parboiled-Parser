@@ -1,6 +1,6 @@
 package ru.mg.coverage.dsl
 
-import ru.mg.parsing.ast.{FunctionNode, ModuleNode, EsqlAstNode}
+import ru.mg.parsing.esql.ast.{FunctionNode, ModuleNode, EsqlAstNode}
 
 
 object DSL {

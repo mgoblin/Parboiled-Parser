@@ -1,9 +1,9 @@
-package ru.mg.esql
+package ru.mg.parser.esql
 
 import org.specs2.mutable.SpecificationWithJUnit
 import io.Source
 import org.parboiled.scala.parserunners.ReportingParseRunner
-import ru.mg.parsing.esql.parts.StatementParser
+import ru.mg.parsing.esql.parser.parts.StatementParser
 
 
 class BeginEndStatementSpec extends SpecificationWithJUnit {

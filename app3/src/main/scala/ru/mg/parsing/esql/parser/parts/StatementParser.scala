@@ -1,7 +1,7 @@
-package ru.mg.parsing.esql.parts
+package ru.mg.parsing.esql.parser.parts
 
 import org.parboiled.scala._
-import ru.mg.parsing.ast.{BeginEndNode, EsqlAstNode}
+import ru.mg.parsing.esql.ast.{BeginEndNode, EsqlAstNode}
 import EsqlAstNode._
 
 

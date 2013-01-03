@@ -2,7 +2,7 @@ package ru.mg.coverage
 
 
 import ast.CoverageNode
-import ru.mg.parsing.ast.{FunctionNode, ModuleNode, EsqlAstNode}
+import ru.mg.parsing.esql.ast.{FunctionNode, ModuleNode, EsqlAstNode}
 import ru.mg.parsing.broker.trace.ast.{BrokerTraceStatementNode, BrokerTraceAstNode}
 
 

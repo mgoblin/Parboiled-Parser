@@ -1,9 +1,9 @@
-package ru.mg.esql
+package ru.mg.parser.esql
 
 import scala.io.Source
 import org.parboiled.scala.parserunners.ReportingParseRunner
-import ru.mg.parsing.esql.parts.FunctionParser
-import ru.mg.parsing.ast.BeginEndNode
+import ru.mg.parsing.esql.parser.parts.FunctionParser
+import ru.mg.parsing.esql.ast.BeginEndNode
 import org.specs2.mutable.SpecificationWithJUnit
 
 
