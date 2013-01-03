@@ -23,7 +23,7 @@ class TraceMatcher(val traces: List[BrokerTraceAstNode]) extends TreeTraversal[E
     }
   }
 
-  //TODO Учитывать в каком модуле расположена EsqlNode
+  //TODO Учитывать в каком модуле расположен esql код, подсчет смещения внутри функции
   private def getTracesForNode(node: EsqlAstNode): List[BrokerTraceAstNode] = {
     traces.filter(trace =>  {
       trace match {

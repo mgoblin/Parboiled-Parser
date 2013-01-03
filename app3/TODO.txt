@@ -1,4 +1,4 @@
-0. Filter trace nodes base on code path
+0. Filter trace nodes base on code path in coverage
 1. Parse function body
 2. DSL for esql file generation on testing purposes
 3. Enhance parent node settings on esql ast
