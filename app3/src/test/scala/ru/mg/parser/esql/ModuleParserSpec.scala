@@ -31,8 +31,11 @@ class ModuleParserSpec extends SpecificationWithJUnit {
       result.resultValue.linesRange must_== (1 to 67)
       result.resultValue.statements.length must_== 3
       result.resultValue.statements(0).isInstanceOf[FunctionNode] must_== true
+      result.resultValue.statements(0).parent.get must_== result.resultValue
       result.resultValue.statements(1).isInstanceOf[FunctionNode] must_== true
+      result.resultValue.statements(1).parent.get must_== result.resultValue
       result.resultValue.statements(2).isInstanceOf[FunctionNode] must_== true
+      result.resultValue.statements(2).parent.get must_== result.resultValue
     }
 
     "parse module with comment and function" in {
