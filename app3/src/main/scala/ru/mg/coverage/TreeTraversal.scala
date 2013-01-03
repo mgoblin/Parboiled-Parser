@@ -2,17 +2,17 @@ package ru.mg.coverage
 
 import scala.annotation.tailrec
 
-trait TreeTraversal[+A, +B, Acc] {
+trait TreeTraversal[A, B, Acc] {
 
-  def getChildrenNodes[R >: A](node: R): List[R]
-  def transform[R >: A](node: R): B
-  def accumulate[R >: B](outputNode: R, oldAccumulator: Acc): Acc
-  def defaultAccumulator(): Acc
+  def getChildrenNodes(node: A): List[A]
+  def transform(node: A): B
+  def accumulate(outputNode: B, oldAccumulator: Acc): Acc
+  val defaultAccumulator: Acc
 
   @tailrec
-  final def traverseTree[R >: A](
-    nodes: List[R],
-    accumulator: Acc = defaultAccumulator()): Acc = {
+  final def traverseTree(
+    nodes: List[A],
+    accumulator: Acc = defaultAccumulator): Acc = {
 
     nodes match {
 

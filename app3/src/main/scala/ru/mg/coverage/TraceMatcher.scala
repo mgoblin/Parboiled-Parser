@@ -8,14 +8,14 @@ import ru.mg.parsing.broker.trace.ast.{BrokerTraceStatementNode, BrokerTraceAstN
 
 class TraceMatcher(val traces: List[BrokerTraceAstNode]) extends TreeTraversal[EsqlAstNode, CoverageNode, List[CoverageNode]] {
 
-  def getChildrenNodes[R >: EsqlAstNode](node: R) = getChildrenStatements(node)
-  def transform[R >: EsqlAstNode](node: R) = makeCoverageNode(node)
-  def accumulate[R >: CoverageNode](outputNode: R, oldAccumulator: List[CoverageNode]): List[CoverageNode] = {
-    outputNode.asInstanceOf[CoverageNode] :: oldAccumulator
+  def getChildrenNodes(node: EsqlAstNode) = getChildrenStatements(node)
+  def transform(node: EsqlAstNode) = makeCoverageNode(node)
+  def accumulate(outputNode: CoverageNode, oldAccumulator: List[CoverageNode]): List[CoverageNode] = {
+    outputNode :: oldAccumulator
   }
-  def defaultAccumulator(): List[CoverageNode] = List()
+  val defaultAccumulator: List[CoverageNode] = List()
 
-  private def getChildrenStatements[R >: EsqlAstNode](node: R) = {
+  private def getChildrenStatements(node: EsqlAstNode) = {
     node match {
       case module: ModuleNode => module.statements
       case function: FunctionNode => function.statements
@@ -24,19 +24,19 @@ class TraceMatcher(val traces: List[BrokerTraceAstNode]) extends TreeTraversal[E
   }
 
   //TODO Учитывать в каком модуле расположена EsqlNode
-  private def getTracesForNode[R >: EsqlAstNode](node: R): List[BrokerTraceAstNode] = {
+  private def getTracesForNode(node: EsqlAstNode): List[BrokerTraceAstNode] = {
     traces.filter(trace =>  {
       trace match {
-        case statement: BrokerTraceStatementNode => node.asInstanceOf[EsqlAstNode].linesRange contains statement.esqlLineNo
+        case statement: BrokerTraceStatementNode => node.linesRange contains statement.esqlLineNo
         case _ => false
       }
     })
   }
 
-  private def makeCoverageNode[R >: EsqlAstNode](esqlNode: R) = {
-    new CoverageNode(esqlNode.asInstanceOf[EsqlAstNode], getTracesForNode(esqlNode))
+  private def makeCoverageNode(esqlNode: EsqlAstNode) = {
+    new CoverageNode(esqlNode, getTracesForNode(esqlNode))
   }
 
-  def matchTraces(nodes: List[EsqlAstNode]) = { traverseTree(nodes) }
+  def matchTraces(nodes: List[EsqlAstNode]) = traverseTree(nodes)
 
 }
