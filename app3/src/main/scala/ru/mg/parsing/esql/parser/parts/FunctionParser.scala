@@ -41,9 +41,7 @@ trait FunctionParser extends StatementParser {
 
   def FunctionBody: Rule1[List[EsqlAstNode]] = rule {
     oneOrMore((BeginEndStatement | Comment) ~ WS) |
-      EXTERNAL ~ NAME ~ "\"" ~ oneOrMore(!"\"" ~ ANY) ~> withContext {
-        externalNode
-      } ~ "\"" ~ StatementDelimiter
+      EXTERNAL ~ NAME ~ "\"" ~ oneOrMore(!"\"" ~ ANY) ~> withContext { externalNode } ~ "\"" ~ StatementDelimiter
   }
 
   def FunctionName = rule {

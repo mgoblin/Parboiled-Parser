@@ -9,10 +9,8 @@ trait StatementParser extends ReservedWordsParser {
 
   def BeginEndStatement: Rule1[BeginEndNode] = rule {
     BEGIN ~
-      zeroOrMore(!(End) ~ ANY) ~> withContext {
-      beginEndNode
-    } ~
-      End
+      zeroOrMore(!(End) ~ ANY) ~> withContext { beginEndNode } ~
+    End
   }
 
   def End = NewLine ~ zeroOrMore(anyOf(" \t")) ~ END ~ StatementDelimiter
