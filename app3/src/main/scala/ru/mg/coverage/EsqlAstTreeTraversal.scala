@@ -6,12 +6,17 @@ import ru.mg.parsing.esql.ast.{FunctionNode, ModuleNode, EsqlAstNode}
 import ru.mg.parsing.broker.trace.ast.{BrokerTraceStatementNode, BrokerTraceAstNode}
 
 
-class TraceMatcher(val traces: List[BrokerTraceAstNode]) extends TreeTraversal[EsqlAstNode, CoverageNode, List[CoverageNode]] {
+class EsqlAstTreeTraversal(val traces: List[BrokerTraceAstNode])
+  extends TreeTraversal[EsqlAstNode, CoverageNode, List[CoverageNode]] {
 
   def getChildrenNodes(node: EsqlAstNode) = getChildrenStatements(node)
   def transform(node: EsqlAstNode) = makeCoverageNode(node)
   def accumulate(outputNode: CoverageNode, oldAccumulator: List[CoverageNode]): List[CoverageNode] = {
-    outputNode :: oldAccumulator
+    outputNode.esqlNode.parent match {
+      case None =>  outputNode :: oldAccumulator
+      case Some(x) => oldAccumulator
+    }
+
   }
   val defaultAccumulator: List[CoverageNode] = List()
 

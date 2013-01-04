@@ -5,7 +5,7 @@ import ru.mg.parsing.broker.trace.ast.BrokerTraceStatementNode
 import ru.mg.coverage.dsl.DSL._
 
 
-class TraceMatcherSpec extends SpecificationWithJUnit {
+class EsqlAstTreeTraversalSpec extends SpecificationWithJUnit {
 
   val esqlNodes = esql (
     module("module Foo") (
@@ -23,18 +23,18 @@ class TraceMatcherSpec extends SpecificationWithJUnit {
     new BrokerTraceStatementNode("10-01-2012 22:44:32", "1000", "UserTrace", "myNode", "// hello", "module", 4) ::
     new BrokerTraceStatementNode("10-01-2012 22:44:32", "1000", "UserTrace", "myNode", "// hello", "module", 15) :: Nil
 
-  "TraceMatcher" should {
+  "EsqlAstTreeTraversal" should {
 
-    "traverse all esql nodes" in {
+    "traverse all esql nodes and return only root nodes" in {
       esqlNodes.size must_== 2
       esqlNodes(0).linesRange.start must_== 1
       esqlNodes(0).linesRange.end must_== 10
       esqlNodes(1).linesRange.start must_== 12
       esqlNodes(1).linesRange.end must_== 50
 
-      val coverageNodes = new TraceMatcher(trace).traverseTree(esqlNodes)
+      val coverageNodes = new EsqlAstTreeTraversal(trace).traverseTree(esqlNodes)
 
-      coverageNodes.size must_== 6
+      coverageNodes.size must_== 2
     }
   }
 }
