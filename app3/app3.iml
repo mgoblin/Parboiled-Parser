@@ -24,7 +24,7 @@
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.9.2" level="project" />
     <orderEntry type="library" name="Maven: org.parboiled:parboiled-scala_2.9.2:1.1.4" level="project" />
     <orderEntry type="library" name="Maven: org.parboiled:parboiled-core:1.1.4" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.8.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.8.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.specs2:specs2_2.9.2:1.12.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.specs2:specs2-scalaz-core_2.9.2:6.0.1" level="project" />
   </component>
