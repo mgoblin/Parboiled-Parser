@@ -90,13 +90,13 @@ case class ModuleNode(
   st: List[EsqlAstNode],
   override val parent: Option[EsqlAstNode] = None)
 extends EsqlAstNode(text, linesRange: Range, parent)  {
-  val statements = st.map { s: EsqlAstNode =>
-    if (s.isInstanceOf[FunctionNode]) {
-      val fn = s.asInstanceOf[FunctionNode]
-      val functionStatements = fn.statements.map{ f: EsqlAstNode => setParent(f, fn) }
-      setParent(fn.copy(statements = functionStatements), this)
-    } else {
-      setParent(s, this)
+
+  val statements: List[EsqlAstNode] = st.map { s => setParent(s, this)
+    s match {
+      case functionNode: FunctionNode =>
+        val parented = functionNode.statements.map { f => setParent(f, functionNode) }
+        functionNode.copy(statements = parented)
+      case _ => s
     }
   }
 }
@@ -113,12 +113,6 @@ case class LineStatementNode(
   override val linesRange: Range,
   override val parent: Option[EsqlAstNode] = None)
 extends EsqlAstNode(text, linesRange: Range, parent)
-
-//abstract case class CommentNode(
-//  override val text: String,
-//  override val linesRange: Range,
-//  override val parent: Option[EsqlAstNode] = None)
-//extends EsqlAstNode(text, linesRange: Range, parent)
 
 case class LineCommentNode(
   override val text: String,

@@ -32,7 +32,7 @@ class EsqlAstTreeTraversalSpec extends SpecificationWithJUnit {
       esqlNodes(1).linesRange.start must_== 12
       esqlNodes(1).linesRange.end must_== 50
 
-      val coverageNodes = new EsqlAstTreeTraversal(trace).traverseTree(esqlNodes)
+      val coverageNodes = new EsqlAstTreeTraversal(trace).traverseAndTransformTree(esqlNodes)
 
       coverageNodes.size must_== 2
     }
