@@ -1,3 +1,4 @@
 0. Filter trace nodes base on code path in coverage
 1. Parse function body
 2. DSL for esql file generation on testing purposes
+3. Esql AST nodes should separate name and declaration of node element
