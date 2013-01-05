@@ -10,7 +10,7 @@ class EsqlAstNodeSpec extends SpecificationWithJUnit {
 
     "calculate code path for leaf nodes" in {
       val functionNode = new FunctionNode("function1", 1 to 10, Nil)
-      functionNode.codePath must_== functionNode.text
+      functionNode.codePart must_== functionNode.text
     }
 
     "calculate code path for module functions" in {
@@ -21,7 +21,7 @@ class EsqlAstNodeSpec extends SpecificationWithJUnit {
       }
       val function1 = module1.statements(0)
 
-      function1.codePath must_== module1.text + "." + function1.text
+      function1.codePart must_== module1.text + "." + function1.text
     }
   }
 

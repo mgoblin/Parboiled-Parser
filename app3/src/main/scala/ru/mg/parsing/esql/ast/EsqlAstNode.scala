@@ -85,7 +85,7 @@ import EsqlAstNode._
 
 sealed abstract class EsqlAstNode(val text: String, val linesRange: Range, val parent: Option[EsqlAstNode] = None) {
 
-  val codePath = esqlCodePath(this, "")
+  val codePart = esqlCodePath(this, "")
 
   @tailrec
   private def esqlCodePath(node: EsqlAstNode, accumulator: String): String = {
