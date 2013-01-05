@@ -1,6 +1,7 @@
 package ru.mg.parsing.esql.ast
 
 import org.parboiled.Context
+import annotation.tailrec
 
 object EsqlAstNode {
 
@@ -82,7 +83,19 @@ object EsqlAstNode {
 
 import EsqlAstNode._
 
-sealed abstract class EsqlAstNode(val text: String, val linesRange: Range, val parent: Option[EsqlAstNode] = None)
+sealed abstract class EsqlAstNode(val text: String, val linesRange: Range, val parent: Option[EsqlAstNode] = None) {
+
+  val codePath = esqlCodePath(this, "")
+
+  @tailrec
+  private def esqlCodePath(node: EsqlAstNode, accumulator: String): String = {
+    val newAccumulator = if (accumulator.isEmpty) node.text else node.text + "." + accumulator
+    node.parent match {
+      case None => newAccumulator
+      case Some(p) => esqlCodePath(p, newAccumulator)
+    }
+  }
+}
 
 case class ModuleNode(
   override val text: String,
