@@ -1,4 +1,4 @@
-package ru.mg.coverage
+package ru.mg.coverage.tree
 
 import scala.annotation.tailrec
 

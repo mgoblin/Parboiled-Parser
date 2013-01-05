@@ -1,8 +1,7 @@
-package ru.mg.coverage
+package ru.mg.coverage.tree
 
-
-import ast.CoverageNode
 import ru.mg.parsing.esql.ast.EsqlAstNode
+import ru.mg.coverage.ast.CoverageNode
 
 
 trait EsqlAstTreeTraversal extends TreeTraversAndTransform[EsqlAstNode, CoverageNode] {
