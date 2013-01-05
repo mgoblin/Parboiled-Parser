@@ -4,7 +4,6 @@ import ru.mg.parsing.esql.ast.EsqlAstNode
 import ru.mg.parsing.broker.trace.ast.BrokerTraceAstNode
 
 class CoverageNode (
-  val parent: Option[CoverageNode],
   val esqlNode : EsqlAstNode,
   val traces: List[BrokerTraceAstNode]
 )

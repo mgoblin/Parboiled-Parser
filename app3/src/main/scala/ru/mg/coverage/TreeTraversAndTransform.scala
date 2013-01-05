@@ -4,22 +4,22 @@ import scala.annotation.tailrec
 
 trait TreeTraversAndTransform[A, B] {
 
-  def getChildren(node: A): List[A]
+  protected def getChildren(node: A): List[A]
 
-  def transform(node: A, parent: Option[B]): B
+  protected def transform(node: A): B
 
-  def accumulate(outputNode: B, oldAccumulator: List[B]): List[B]
+  protected def accumulate(outputNode: B, oldAccumulator: List[B]): List[B]
 
   @tailrec
-  final def traverseAndTransformTree( nodes: List[A], accumulator: List[B] = List(), parent: Option[B] = None): List[B] = nodes match {
+  final def traverseAndTransformTree( nodes: List[A], accumulator: List[B] = List()): List[B] = nodes match {
 
     case currentNode :: queueTail =>
 
       val children = getChildren(currentNode)
-      val outputNode = transform(currentNode, parent)
+      val outputNode = transform(currentNode)
       val newAccumulator = accumulate(outputNode, accumulator)
 
-      traverseAndTransformTree(children ::: queueTail, newAccumulator, Some(outputNode))
+      traverseAndTransformTree(children ::: queueTail, newAccumulator)
 
     case Nil =>
       accumulator

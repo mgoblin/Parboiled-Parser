@@ -91,8 +91,9 @@ case class ModuleNode(
   override val parent: Option[EsqlAstNode] = None)
 extends EsqlAstNode(text, linesRange: Range, parent)  {
 
-  val statements: List[EsqlAstNode] = st.map { s => setParent(s, this)
-    s match {
+  val statements: List[EsqlAstNode] = st.map { s =>
+    val p = setParent(s, this)
+    p match {
       case functionNode: FunctionNode =>
         val parented = functionNode.statements.map { f => setParent(f, functionNode) }
         functionNode.copy(statements = parented)
