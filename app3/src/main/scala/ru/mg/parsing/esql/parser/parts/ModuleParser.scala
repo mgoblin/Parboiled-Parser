@@ -12,8 +12,8 @@ trait ModuleParser extends FunctionParser {
   }
 
   def ModuleDeclaration: Rule1[String] = rule {
-    def moduleDecl = { (x: String, y: String) =>
-      y
+    def moduleDecl = { (moduleType: String, name: String) =>
+      name
     }
     CREATE ~ (ModuleType ~ MODULE ~ ModuleName) ~~> { moduleDecl } ~ WS
   }
