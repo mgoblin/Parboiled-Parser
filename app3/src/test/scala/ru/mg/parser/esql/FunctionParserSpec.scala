@@ -109,7 +109,8 @@ class FunctionParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
       val decl = result.resultValue
-      decl.text must_== "Main()"
+      decl.declaration must_== "Main()"
+      decl.text must_== "Main"
       decl.statements.size must_== 2
       decl.statements(1).isInstanceOf[BeginEndNode] must_== true
     }
@@ -123,7 +124,8 @@ class FunctionParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.FunctionStatement).run(input)
 
       val decl = result.resultValue
-      decl.text must_== "Main() LANGUAGE ESQL"
+      decl.declaration must_== "Main() LANGUAGE ESQL"
+      decl.text must_== "Main"
       decl.statements.size must_== 1
       decl.statements(0).isInstanceOf[BeginEndNode] must_== true
     }

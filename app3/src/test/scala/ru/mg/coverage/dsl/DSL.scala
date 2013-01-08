@@ -22,7 +22,7 @@ object DSL {
   }
 
   def  function(name: String, range: Range) = {
-    new FunctionNode(name, range, Nil)
+    new FunctionNode(name, name, range, Nil)
   }
 
 }

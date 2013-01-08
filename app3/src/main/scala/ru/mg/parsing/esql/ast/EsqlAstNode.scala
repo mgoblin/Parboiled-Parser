@@ -16,7 +16,9 @@ object EsqlAstNode {
     (signature: String, body: List[EsqlAstNode], context: Context[_]) =>
       val startLine = context.getInputBuffer.getPosition(context.getStartIndex).line
       val endLine = context.getPosition.line
-      new FunctionNode(signature.trim(), startLine to endLine, body)
+      val s = signature.trim
+      val name = s.substring(0, s.indexOf('('))
+      new FunctionNode(name, s, startLine to endLine, body)
   }
 
   def lineStatementNode = {
@@ -117,6 +119,7 @@ extends EsqlAstNode(text, linesRange: Range, parent)  {
 
 case class FunctionNode(
   override val text: String,
+  declaration: String,
   override val linesRange: Range,
   statements: List[EsqlAstNode],
   override val parent: Option[EsqlAstNode] = None)

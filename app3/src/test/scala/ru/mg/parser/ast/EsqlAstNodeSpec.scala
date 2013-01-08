@@ -9,7 +9,7 @@ class EsqlAstNodeSpec extends SpecificationWithJUnit {
   "EsqlAstNode" should {
 
     "calculate code path for leaf nodes" in {
-      val functionNode = new FunctionNode("function1", 1 to 10, Nil)
+      val functionNode = new FunctionNode("function1()", "function1()", 1 to 10, Nil)
       functionNode.codePart must_== functionNode.text
     }
 
