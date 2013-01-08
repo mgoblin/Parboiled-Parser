@@ -1,4 +1,3 @@
 1. Parse function body
 2. DSL for esql file generation on testing purposes
 3. Write tests for the Coverage
-4. Esql AST nodes should separate name and declaration of node element
