@@ -1,21 +1,25 @@
 package ru.mg.parsing.esql.parser.parts
 
-import ru.mg.parsing.esql.ast.EsqlAstNode
+import ru.mg.parsing.esql.ast.{ModuleNode, EsqlAstNode}
 import EsqlAstNode._
 import org.parboiled.scala._
 
 
 trait ModuleParser extends FunctionParser {
 
-  def ModuleStatement = rule {
-    (ModuleHeader ~ ModuleBody ~ ModuleFooter) ~~> withContext(moduleNode)
+  def ModuleStatement: Rule1[ModuleNode] = rule {
+    (ModuleDeclaration ~ ModuleBody ~ ModuleFooter) ~~> withContext(moduleNode)
   }
 
-  def ModuleHeader = rule {
-    def join = {
-      x: String => x.split(" ").map(_.trim()).filter(!_.isEmpty).mkString(" ")
+  def ModuleDeclaration: Rule1[String] = rule {
+    def moduleDecl = { (x: String, y: String) =>
+      y
     }
-    CREATE ~ (COMPUTE | DATABASE | FILTER) ~ MODULE ~ ModuleName ~ WS ~> join
+    CREATE ~ (ModuleType ~ MODULE ~ ModuleName) ~~> { moduleDecl } ~ WS
+  }
+
+  def ModuleType = rule {
+    (COMPUTE | DATABASE | FILTER) ~> {_.toString }
   }
 
   def ModuleFooter = rule {
@@ -28,6 +32,8 @@ trait ModuleParser extends FunctionParser {
     zeroOrMore((Comment | FunctionStatement | DeclareStatement ) ~ WS)
   }
 
-  def ModuleName = Identifier
+  def ModuleName = rule {
+    oneOrMore("a" - "z" | "A" - "Z" | "0" - "9" | "_") ~> { _.toString }
+  }
 
 }

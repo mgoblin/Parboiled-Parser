@@ -19,6 +19,7 @@ class ModuleParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.ModuleStatement).run(input)
 
       result.hasErrors must_== false
+      result.resultValue.text must_== "Routing_using_memory_cache_Compute"
       result.resultValue.linesRange must_== (1 to 3)
       result.resultValue.statements.length must_== 0
     }
@@ -28,6 +29,7 @@ class ModuleParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.ModuleStatement).run(input)
 
       result.hasErrors must_== false
+      result.resultValue.text must_== "Routing_using_memory_cache_Compute"
       result.resultValue.linesRange must_== (1 to 67)
       result.resultValue.statements.length must_== 3
       result.resultValue.statements(0).isInstanceOf[FunctionNode] must_== true
@@ -43,6 +45,7 @@ class ModuleParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.ModuleStatement).run(input)
 
       result.hasErrors must_== false
+      result.resultValue.text must_== "Routing_using_memory_cache_Compute"
       result.resultValue.linesRange must_== (1 to 187)
       result.resultValue.statements.length must_== 5
       result.resultValue.statements(0).isInstanceOf[BlockCommentNode] must_== true
@@ -57,6 +60,7 @@ class ModuleParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.ModuleStatement).run(input)
 
       result.hasErrors must_== false
+      result.resultValue.text must_== "Routing_using_memory_cache_Compute"
       result.resultValue.linesRange must_== (1 to 189)
       result.resultValue.statements.length must_== 6
       result.resultValue.statements(0).isInstanceOf[BlockCommentNode] must_== true
