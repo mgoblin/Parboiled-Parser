@@ -9,14 +9,14 @@ object EsqlAstNode {
     (header: String, statements: List[EsqlAstNode], footer: String, context: Context[_]) =>
       val startLine = context.getInputBuffer.getPosition(context.getStartIndex).line
       val endLine = context.getPosition.line
-      new ModuleNode(header, startLine to endLine, statements)
+      new ModuleNode(header, header, startLine to endLine, statements)
   }
 
   def functionNode = {
     (signature: String, body: List[EsqlAstNode], context: Context[_]) =>
       val startLine = context.getInputBuffer.getPosition(context.getStartIndex).line
       val endLine = context.getPosition.line
-      new FunctionNode(signature.trim(), startLine to endLine, body)
+      new FunctionNode(signature.trim(), signature.trim(), startLine to endLine, body)
   }
 
   def lineStatementNode = {
@@ -50,21 +50,21 @@ object EsqlAstNode {
     (body: String, context: Context[_]) =>
       val startLine = context.getInputBuffer.getPosition(context.getStartIndex).line
       val endLine = context.getPosition.line
-      List(new ExternalNode(body.trim, startLine to endLine))
+      List(new ExternalNode(body.trim, body.trim, startLine to endLine))
   }
 
   def schemaNode  = {
     (text: String, context: Context[_]) =>
       val startLine = context.getInputBuffer.getPosition(context.getStartIndex).line
       val endLine = context.getPosition.line
-      new SchemaNode(text, startLine to endLine)
+      new SchemaNode(text, text, startLine to endLine)
   }
 
   def pathNode  = {
     (text: String, context: Context[_]) =>
       val startLine = context.getInputBuffer.getPosition(context.getStartIndex).line
       val endLine = context.getPosition.line
-      new PathNode(text, startLine to endLine)
+      new PathNode(text, text, startLine to endLine)
   }
 
   def setParent(node: EsqlAstNode, parent: EsqlAstNode) = node match {
@@ -83,7 +83,7 @@ object EsqlAstNode {
 
 import EsqlAstNode._
 
-sealed abstract class EsqlAstNode(val text: String, val linesRange: Range, val parent: Option[EsqlAstNode] = None) {
+sealed abstract class EsqlAstNode(val name: String, val text: String, val linesRange: Range, val parent: Option[EsqlAstNode] = None) {
 
   val codePart = esqlCodePath(this, "")
 
@@ -98,11 +98,12 @@ sealed abstract class EsqlAstNode(val text: String, val linesRange: Range, val p
 }
 
 case class ModuleNode(
+  override val name: String,
   override val text: String,
   override val linesRange: Range,
   st: List[EsqlAstNode],
   override val parent: Option[EsqlAstNode] = None)
-extends EsqlAstNode(text, linesRange: Range, parent)  {
+extends EsqlAstNode(name, text, linesRange: Range, parent)  {
 
   val statements: List[EsqlAstNode] = st.map { s =>
     val p = setParent(s, this)
@@ -116,50 +117,54 @@ extends EsqlAstNode(text, linesRange: Range, parent)  {
 }
 
 case class FunctionNode(
+  override val name: String,
   override val text: String,
   override val linesRange: Range,
   statements: List[EsqlAstNode],
   override val parent: Option[EsqlAstNode] = None)
-extends EsqlAstNode(text, linesRange: Range, parent)
+extends EsqlAstNode(name, text, linesRange: Range, parent)
 
 case class LineStatementNode(
   override val text: String,
   override val linesRange: Range,
   override val parent: Option[EsqlAstNode] = None)
-extends EsqlAstNode(text, linesRange: Range, parent)
+extends EsqlAstNode(text, text, linesRange: Range, parent)
 
 case class LineCommentNode(
   override val text: String,
   override val linesRange: Range,
   override val parent: Option[EsqlAstNode] = None)
-extends EsqlAstNode(text, linesRange: Range, parent)
+extends EsqlAstNode(text, text, linesRange: Range, parent)
 
 case class BlockCommentNode (
   override val text: String,
   override val linesRange: Range,
   override val parent: Option[EsqlAstNode] = None
-) extends EsqlAstNode(text, linesRange: Range, parent)
+) extends EsqlAstNode(text, text, linesRange: Range, parent)
 
 case class BeginEndNode (
   override val text: String,
   override val linesRange: Range,
   override val parent: Option[EsqlAstNode] = None
-) extends EsqlAstNode(text, linesRange: Range, parent)
+) extends EsqlAstNode(text, text, linesRange: Range, parent)
 
 case class ExternalNode (
+  override val name: String,
   override val text: String,
   override val linesRange: Range,
   override val parent: Option[EsqlAstNode] = None
-) extends EsqlAstNode(text, linesRange: Range, parent)
+) extends EsqlAstNode(name, text, linesRange: Range, parent)
 
 case class SchemaNode (
+  override val name: String,
   override val text: String,
   override val linesRange: Range,
   override val parent: Option[EsqlAstNode] = None
-) extends EsqlAstNode(text, linesRange: Range, parent)
+) extends EsqlAstNode(name, text, linesRange: Range, parent)
 
 case class PathNode (
+  override val name: String,
   override val text: String,
   override val linesRange: Range,
   override val parent: Option[EsqlAstNode] = None
-) extends EsqlAstNode(text, linesRange: Range, parent)
+) extends EsqlAstNode(name, text, linesRange: Range, parent)

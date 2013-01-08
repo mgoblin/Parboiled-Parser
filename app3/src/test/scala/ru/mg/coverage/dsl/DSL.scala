@@ -17,12 +17,13 @@ object DSL {
   def module(name: String) (statements: EsqlAstNode*): ModuleNode = {
     new ModuleNode(
       name,
+      name,
       linesRange(statements),
       statements.toList)
   }
 
   def  function(name: String, range: Range) = {
-    new FunctionNode(name, range, Nil)
+    new FunctionNode(name, name, range, Nil)
   }
 
 }
