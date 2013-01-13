@@ -6,7 +6,6 @@ import scala.io.Source
 import ru.mg.parsing.esql.ast._
 import ru.mg.parsing.esql.ast.FunctionNode
 import ru.mg.parsing.esql.ast.LineCommentNode
-import ru.mg.parsing.esql.ast.LineStatementNode
 import ru.mg.parsing.esql.ast.ModuleNode
 import ru.mg.parsing.esql.parser.ESQLParser
 import org.specs2.mutable.SpecificationWithJUnit
@@ -24,7 +23,10 @@ class ESQLParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.Statement).run(input)
 
       result.hasErrors must_==  false
-      result.resultValue.text must_== "CacheQueueTable SHARED ROW"
+      result.resultValue.isInstanceOf[DeclareNode] must_== true
+      val node = result.resultValue.asInstanceOf[DeclareNode]
+      node.declaration must_== "CacheQueueTable SHARED ROW"
+      node.text must_== "CacheQueueTable"
     }
 
     "parse file with line comment" in {
@@ -67,7 +69,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
 
       result.hasErrors must_== false
       result.resultValue.length must_== 4
-      result.resultValue(0).isInstanceOf[LineStatementNode] must_== true
+      result.resultValue(0).isInstanceOf[DeclareNode] must_== true
       result.resultValue(1).isInstanceOf[LineCommentNode] must_== true
       result.resultValue(2).isInstanceOf[ModuleNode] must_== true
       result.resultValue(3).isInstanceOf[ModuleNode] must_== true
@@ -93,7 +95,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
       result.hasErrors must_== false
       result.resultValue.length must_== 12
       result.resultValue(0).isInstanceOf[SchemaNode] must_== true
-      result.resultValue(1).isInstanceOf[LineStatementNode] must_== true
+      result.resultValue(1).isInstanceOf[DeclareNode] must_== true
       result.resultValue(6).isInstanceOf[FunctionNode] must_== true
 
     }
@@ -129,7 +131,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
       result.hasErrors must_== false
       result.resultValue.length must_== 8
       result.resultValue(0).isInstanceOf[SchemaNode] must_== true
-      result.resultValue(1).isInstanceOf[LineStatementNode] must_== true
+      result.resultValue(1).isInstanceOf[DeclareNode] must_== true
       result.resultValue(6).isInstanceOf[ModuleNode] must_== true
 
     }
@@ -165,7 +167,7 @@ class ESQLParserSpec extends SpecificationWithJUnit {
       result.hasErrors must_== false
       result.resultValue.length must_== 5
       result.resultValue(0).isInstanceOf[SchemaNode] must_== true
-      result.resultValue(1).isInstanceOf[LineStatementNode] must_== true
+      result.resultValue(1).isInstanceOf[DeclareNode] must_== true
       result.resultValue(2).isInstanceOf[ModuleNode] must_== true
 
     }
@@ -177,8 +179,8 @@ class ESQLParserSpec extends SpecificationWithJUnit {
       result.hasErrors must_== false
       result.resultValue.length must_== 24
       result.resultValue(0).isInstanceOf[SchemaNode] must_== true
-      result.resultValue(1).isInstanceOf[LineStatementNode] must_== true
-      result.resultValue(2).isInstanceOf[LineStatementNode] must_== true
+      result.resultValue(1).isInstanceOf[DeclareNode] must_== true
+      result.resultValue(2).isInstanceOf[DeclareNode] must_== true
 
     }
   }

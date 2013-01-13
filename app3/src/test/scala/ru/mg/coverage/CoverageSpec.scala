@@ -7,7 +7,7 @@ import ru.mg.parsing.broker.trace.parser.BrokerTraceParser
 import io.Source
 import org.parboiled.scala.parserunners.ReportingParseRunner
 import ru.mg.parsing.esql.parser.ESQLParser
-import ru.mg.parsing.esql.ast.{LineStatementNode, ModuleNode}
+import ru.mg.parsing.esql.ast.{DeclareNode, ModuleNode}
 
 
 class CoverageSpec extends SpecificationWithJUnit {
@@ -58,7 +58,7 @@ class CoverageSpec extends SpecificationWithJUnit {
       coverageNodes.size must_== 6
     }
 
-    "make coverage for esql and broker trace" in {
+    "make coverage for esql for global declarations" in {
 
       val traceNodes = parseTrace("/traces/traceForStatementFilter.txt")
       val esqlNodes = parseEsql("/esql/esql.txt")
@@ -72,9 +72,12 @@ class CoverageSpec extends SpecificationWithJUnit {
       rootNodes.forall { node => esqlNodes.exists { _ == node.esqlNode } } must_== true
       rootNodes.forall { node => if (node.isInstanceOf[ModuleNode]) node.traces.isEmpty else true } must_== true
 
-      val sharedRowNode = rootNodes.find {_.esqlNode.isInstanceOf[LineStatementNode] }
+      val sharedRowNode = rootNodes.find {_.esqlNode.isInstanceOf[DeclareNode] }
       sharedRowNode must_!= None
-      //sharedRowNode.get.traces.size must_== 1
+      sharedRowNode.get.traces.size must_== 1
+
+      val modulesCoverage = rootNodes.filter { _.esqlNode.isInstanceOf[ModuleNode] }
+      modulesCoverage.forall { _.traces.isEmpty } must_== true
     }
   }
 }

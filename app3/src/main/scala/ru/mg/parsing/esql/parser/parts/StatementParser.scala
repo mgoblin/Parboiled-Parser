@@ -28,9 +28,15 @@ trait StatementParser extends ReservedWordsParser {
   }
 
   def DeclareStatement = rule {
-    DECLARE ~ zeroOrMore(!StatementDelimiter ~ ANY) ~> withContext {
-      lineStatementNode
-    } ~ StatementDelimiter
+    DECLARE ~ Names ~ zeroOrMore(!StatementDelimiter ~ ANY) ~> {_.toString} ~ StatementDelimiter ~~> withContext {
+      declareStatementNode
+    }
+  }
+
+  def Names: Rule1[List[String]] = rule {
+    Identifier ~> {_.toString} ~ zeroOrMore("," ~ WS ~ Identifier ~> {_.toString}) ~~> { (id, ids) =>
+      id :: ids
+    }
   }
 
   def StatementDelimiter = ignoreCase(";")

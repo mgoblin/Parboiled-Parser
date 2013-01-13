@@ -28,6 +28,14 @@ object EsqlAstNode {
       new LineStatementNode(text.trim(), startLine to endLine)
   }
 
+  def declareStatementNode = {
+    (ids: List[String], text: String, context: Context[_]) =>
+      val startLine = context.getInputBuffer.getPosition(context.getStartIndex).line
+      val endLine = context.getPosition.line
+      val idsString = ids.mkString(", ")
+      new DeclareNode(idsString, idsString + text, startLine to endLine)
+  }
+
   def commentNode = {
     (text: String, context: Context[_]) =>
       new LineCommentNode(text.trim(), context.getPosition.line to context.getPosition.line)
@@ -79,6 +87,7 @@ object EsqlAstNode {
       case ls:  LineStatementNode => ls.copy(parent = Some(parent))
       case lc:  LineCommentNode => lc.copy(parent = Some(parent))
       case bc:  BlockCommentNode => bc.copy(parent = Some(parent))
+      case d:   DeclareNode => d.copy(parent = Some(parent))
   }
 
 }
@@ -163,6 +172,13 @@ case class SchemaNode (
 
 case class PathNode (
   override val text: String,
+  override val linesRange: Range,
+  override val parent: Option[EsqlAstNode] = None
+) extends EsqlAstNode(text, linesRange: Range, parent)
+
+case class DeclareNode (
+  override val text: String,
+  declaration: String,
   override val linesRange: Range,
   override val parent: Option[EsqlAstNode] = None
 ) extends EsqlAstNode(text, linesRange: Range, parent)

@@ -55,7 +55,8 @@ class StatementParserSpec extends SpecificationWithJUnit {
       val input = "declare CacheQueueTable SHARED ROW;"
       val result = ReportingParseRunner(parser.DeclareStatement).run(input)
 
-      check(result, "CacheQueueTable SHARED ROW")
+      check(result, "CacheQueueTable")
+      result.resultValue.declaration must_== "CacheQueueTable SHARED ROW"
     }
 
     "Parse multi line statement" in  {
@@ -63,7 +64,8 @@ class StatementParserSpec extends SpecificationWithJUnit {
       val input = "declare \n  CacheQueueTable \nSHARED ROW;"
       val result = ReportingParseRunner(parser.DeclareStatement).run(input).resultValue
 
-      result.text must_== "CacheQueueTable \nSHARED ROW"
+      result.declaration must_== "CacheQueueTable \nSHARED ROW"
+      result.text must_== "CacheQueueTable"
       result.linesRange must_== (1 to 3)
     }
 
@@ -72,7 +74,8 @@ class StatementParserSpec extends SpecificationWithJUnit {
       val input = "declare CacheQueueTable SHARED ROW; -- comment"
       val result = ReportingParseRunner(parser.DeclareStatement).run(input)
 
-      check(result, "CacheQueueTable SHARED ROW")
+      check(result, "CacheQueueTable")
+      result.resultValue.declaration must_== "CacheQueueTable SHARED ROW"
     }
 
     "Parse line statement with block comment" in  {
@@ -86,7 +89,8 @@ class StatementParserSpec extends SpecificationWithJUnit {
       val result = ReportingParseRunner(parser.DeclareStatement).run(input)
 
       val node = result.resultValue
-      node.text must_== "CacheQueueTable SHARED ROW"
+      node.declaration must_== "CacheQueueTable SHARED ROW"
+      node.text must_== "CacheQueueTable"
       node.linesRange must_== (1 to 1)
     }
 
@@ -95,7 +99,8 @@ class StatementParserSpec extends SpecificationWithJUnit {
       val input = "declare CacheQueueTable SHARED ROW; \n-- comment"
       val result = ReportingParseRunner(parser.DeclareStatement).run(input).resultValue
 
-      result.text must_== "CacheQueueTable SHARED ROW"
+      result.declaration must_== "CacheQueueTable SHARED ROW"
+      result.text must_== "CacheQueueTable"
     }
 
     "Dont be greedy with statements" in {
@@ -103,8 +108,8 @@ class StatementParserSpec extends SpecificationWithJUnit {
       val input = "declare CacheQueueTable SHARED ROW; \n call;"
       val result = ReportingParseRunner(parser.DeclareStatement).run(input).resultValue
 
-      result.text must_== "CacheQueueTable SHARED ROW"
-
+      result.declaration must_== "CacheQueueTable SHARED ROW"
+      result.text must_== "CacheQueueTable"
     }
 
     "Parse empty block comment" in {

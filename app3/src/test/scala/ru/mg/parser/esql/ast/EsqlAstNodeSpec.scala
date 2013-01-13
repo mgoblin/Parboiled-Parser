@@ -1,7 +1,9 @@
-package ru.mg.parser.ast
+package ru.mg.parser.esql.ast
 
 import org.specs2.mutable.SpecificationWithJUnit
 import ru.mg.parsing.esql.ast.{ModuleNode, FunctionNode}
+import ru.mg.parsing.esql.parser.ESQLParser
+import org.parboiled.scala.parserunners.ReportingParseRunner
 
 
 class EsqlAstNodeSpec extends SpecificationWithJUnit {
@@ -22,6 +24,15 @@ class EsqlAstNodeSpec extends SpecificationWithJUnit {
       val function1 = module1.statements(0)
 
       function1.codePart must_== "." + module1.text + "." + function1.text
+    }
+
+    "calculate code path for root shared row declaration" in {
+      val sharedRowDecl = "declare CacheQueueTable SHARED ROW;"
+      val esqlParser = new ESQLParser { override val buildParseTree = true }
+      val esqlRun = ReportingParseRunner(esqlParser.ESQLFile).run(sharedRowDecl)
+      val esqlNode = esqlRun.resultValue(0)
+
+      esqlNode.codePart must_==  ".CacheQueueTable"
     }
   }
 
