@@ -14,5 +14,10 @@ trait EsqlAstTreeTraversal extends TreeTraversAndTransform[EsqlAstNode, Coverage
 
   protected def accumulate(
     outputNode: CoverageNode,
-    oldAccumulator: List[CoverageNode]): List[CoverageNode] = outputNode :: oldAccumulator
+    oldAccumulator: List[CoverageNode]): List[CoverageNode] =
+
+    if(outputNode.ignore)
+      oldAccumulator
+    else
+      outputNode :: oldAccumulator
 }

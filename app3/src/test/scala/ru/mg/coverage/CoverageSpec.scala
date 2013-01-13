@@ -1,13 +1,17 @@
 package ru.mg.coverage
 
 import org.specs2.mutable.SpecificationWithJUnit
-import ru.mg.parsing.broker.trace.ast.BrokerTraceStatementNode
 import ru.mg.coverage.dsl.DSL._
 import ru.mg.parsing.broker.trace.parser.BrokerTraceParser
 import io.Source
 import org.parboiled.scala.parserunners.ReportingParseRunner
 import ru.mg.parsing.esql.parser.ESQLParser
-import ru.mg.parsing.esql.ast.{DeclareNode, ModuleNode}
+import ru.mg.parsing.esql.ast._
+import ru.mg.parsing.esql.ast.FunctionNode
+import ru.mg.parsing.esql.ast.LineCommentNode
+import ru.mg.parsing.esql.ast.DeclareNode
+import ru.mg.parsing.esql.ast.ModuleNode
+import ru.mg.parsing.broker.trace.ast.BrokerTraceStatementNode
 
 
 class CoverageSpec extends SpecificationWithJUnit {
@@ -58,7 +62,7 @@ class CoverageSpec extends SpecificationWithJUnit {
       coverageNodes.size must_== 6
     }
 
-    "make coverage for esql for global declarations" in {
+    "make coverage for esql global declarations" in {
 
       val traceNodes = parseTrace("/traces/traceForStatementFilter.txt")
       val esqlNodes = parseEsql("/esql/esql.txt")
@@ -78,6 +82,33 @@ class CoverageSpec extends SpecificationWithJUnit {
 
       val modulesCoverage = rootNodes.filter { _.esqlNode.isInstanceOf[ModuleNode] }
       modulesCoverage.forall { _.traces.isEmpty } must_== true
+    }
+
+    "Ignore comments" in {
+      val traceNodes = parseTrace("/traces/traceForStatementFilter.txt")
+      val esqlNodes = parseEsql("/esql/esql.txt")
+
+      val coverage = new Coverage(traceNodes)
+      val coverageNodes = coverage.coverageForEsqNodes(esqlNodes)
+
+      coverageNodes.isEmpty must_== false
+
+      coverageNodes.find { _.esqlNode.isInstanceOf[LineCommentNode] } must_== None
+      coverageNodes.find { _.esqlNode.isInstanceOf[BlockCommentNode] } must_== None
+    }
+
+    "make coverage for esql functions" in {
+
+      val traceNodes = parseTrace("/traces/traceForStatementFilter.txt")
+      val esqlNodes = parseEsql("/esql/esql.txt")
+
+      val coverage = new Coverage(traceNodes)
+      val coverageNodes = coverage.coverageForEsqNodes(esqlNodes)
+
+      coverageNodes.isEmpty must_== false
+
+      val functionNode = coverageNodes.find {_.esqlNode.isInstanceOf[FunctionNode] }
+      functionNode must_!= None
     }
   }
 }

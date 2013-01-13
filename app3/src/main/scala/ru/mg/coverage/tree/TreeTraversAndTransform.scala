@@ -22,6 +22,6 @@ trait TreeTraversAndTransform[A, B] {
       traverseAndTransformTree(children ::: queueTail, newAccumulator)
 
     case Nil =>
-      accumulator
+      accumulator.reverse
   }
 }
