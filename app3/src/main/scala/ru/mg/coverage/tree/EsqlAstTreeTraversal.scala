@@ -1,13 +1,14 @@
 package ru.mg.coverage.tree
 
-import ru.mg.parsing.esql.ast.EsqlAstNode
+import ru.mg.parsing.esql.ast.{FunctionNode, ModuleNode, EsqlAstNode}
 import ru.mg.coverage.ast.CoverageNode
 
 
 trait EsqlAstTreeTraversal extends TreeTraversAndTransform[EsqlAstNode, CoverageNode] {
 
   protected def getChildren(node: EsqlAstNode) = node match {
-    case s: {def statements: List[EsqlAstNode]} => s.statements
+    case m: ModuleNode => m.statements
+    case f: FunctionNode => f.statements
     case _ => Nil
   }
 

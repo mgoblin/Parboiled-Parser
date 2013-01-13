@@ -3,6 +3,11 @@ package ru.mg.coverage
 import org.specs2.mutable.SpecificationWithJUnit
 import ru.mg.parsing.broker.trace.ast.BrokerTraceStatementNode
 import ru.mg.coverage.dsl.DSL._
+import ru.mg.parsing.broker.trace.parser.BrokerTraceParser
+import io.Source
+import org.parboiled.scala.parserunners.ReportingParseRunner
+import ru.mg.parsing.esql.parser.ESQLParser
+import ru.mg.parsing.esql.ast.{LineStatementNode, ModuleNode}
 
 
 class CoverageSpec extends SpecificationWithJUnit {
@@ -17,6 +22,22 @@ class CoverageSpec extends SpecificationWithJUnit {
       function("f4", 41 to 50)
     )
   )
+
+  def parseTrace(fileName: String) = {
+    val traceParser = new BrokerTraceParser { override val buildParseTree = true }
+    val traceInput = Source.fromURL(getClass.getResource(fileName)).getLines().mkString("\n")
+    val traceRun = ReportingParseRunner(traceParser.Trace).run(traceInput)
+    traceRun.resultValue
+  }
+
+  def parseEsql(fileName: String) = {
+    val esqlParser = new ESQLParser { override val buildParseTree = true }
+    val esqlFile = Source.fromURL(getClass.getResource(fileName)).getLines().mkString("\n")
+    val esqlRun = ReportingParseRunner(esqlParser.ESQLFile).run(esqlFile)
+    esqlRun.resultValue
+  }
+
+
 
   val trace = new BrokerTraceStatementNode("10-01-2012 22:44:32", "1000", "UserTrace", "myNode", "// hello", "module", 1) ::
     new BrokerTraceStatementNode("10-01-2012 22:44:32", "1000", "UserTrace", "myNode", "// hello", "module", 2) ::
@@ -35,6 +56,25 @@ class CoverageSpec extends SpecificationWithJUnit {
       val coverageNodes = new Coverage(trace).coverageForEsqNodes(esqlNodes)
 
       coverageNodes.size must_== 6
+    }
+
+    "make coverage for esql and broker trace" in {
+
+      val traceNodes = parseTrace("/traces/traceForStatementFilter.txt")
+      val esqlNodes = parseEsql("/esql/esql.txt")
+
+      val coverage = new Coverage(traceNodes)
+      val coverageNodes = coverage.coverageForEsqNodes(esqlNodes)
+
+      coverageNodes.isEmpty must_== false
+
+      val rootNodes = coverageNodes.filter { _.esqlNode.parent == None }
+      rootNodes.forall { node => esqlNodes.exists { _ == node.esqlNode } } must_== true
+      rootNodes.forall { node => if (node.isInstanceOf[ModuleNode]) node.traces.isEmpty else true } must_== true
+
+      val sharedRowNode = rootNodes.find {_.esqlNode.isInstanceOf[LineStatementNode] }
+      sharedRowNode must_!= None
+      //sharedRowNode.get.traces.size must_== 1
     }
   }
 }

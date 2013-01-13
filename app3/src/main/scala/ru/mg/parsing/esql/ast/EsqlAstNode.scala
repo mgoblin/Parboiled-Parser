@@ -93,7 +93,7 @@ sealed abstract class EsqlAstNode(val text: String, val linesRange: Range, val p
   private def esqlCodePath(node: EsqlAstNode, accumulator: String): String = {
     val newAccumulator = if (accumulator.isEmpty) node.text else node.text + "." + accumulator
     node.parent match {
-      case None => newAccumulator
+      case None => "." + newAccumulator
       case Some(p) => esqlCodePath(p, newAccumulator)
     }
   }
