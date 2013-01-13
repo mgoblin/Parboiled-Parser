@@ -19,6 +19,7 @@ trait TraceFilter {
   def isSameCodePart(node: EsqlAstNode, trace: BrokerTraceStatementNode) = node.codePart == trace.codePart
 
   def isInLineRange(node: EsqlAstNode, trace: BrokerTraceStatementNode): Boolean  = node match {
+    // TODO relative line nums
     case b: BeginEndNode => true
     case _ => node.linesRange.contains(trace.esqlLineNo)
   }
